@@ -190,15 +190,18 @@ export function answerMicahQuestion(
   const packageLabel = getSimplePackageName(quote)
 
   if (/how much|price|cost|charge|one-page|one page|google|email/.test(lower)) {
-    return `${packageName} is currently ${price}. It includes ${inclusions}. This is packaged as a ${packageLabel} so it is easier for ${customer} to approve.`
+    if (quote.quoteTypeId === 'dos-website-growth') {
+      return 'This quote is $1,990 setup plus $49/month ongoing support.'
+    }
+    return `This quote is ${price}. It includes ${inclusions}. Packaged as a ${packageLabel} so it is easier for ${customer} to approve.`
   }
 
   if (/cheaper|discount|reduce|budget|profitable|margin/.test(lower)) {
-    return `To make this cheaper but still profitable, keep ${inclusions} in the main package and move lower-urgency extras or extra support into an optional add-on. Keep the core offer at ${price} unless you deliberately reduce scope.`
+    return `Keep the one-page website and Google setup, but move optional extras into add-ons. That keeps the core package simple without removing margin. Current offer: ${price}.`
   }
 
   if (/what should i charge|charge .*|send .*|send to|luke/.test(lower)) {
-    return `Send ${customer} the packaged offer, not every small task itemised. I would present ${packageName} at ${price}, explain that it includes ${inclusions}, and ask them to reply approved so you can confirm timing and deposit.`
+    return `Send the packaged offer instead of itemising every small task. Present ${packageName} at ${price} to ${customer} — easier to approve. Review before sending.`
   }
 
   if (/support|ongoing|maintenance|hosting|add support/.test(lower)) {
@@ -207,8 +210,8 @@ export function answerMicahQuestion(
       : `Yes. Add a simple Ongoing support line, usually monthly or yearly. For this quote, keep the main ${packageLabel} clean and show support as an optional add-on.`
   }
 
-  if (/follow.?up|chase|remind/.test(lower)) {
-    return `Prepare a friendly follow-up for ${customer}: "Just checking in on ${packageName}. Happy to answer questions or adjust the scope if needed." The quote is currently ${status}, so review before sending.`
+  if (/follow.?up|chase|remind|prepare follow/.test(lower)) {
+    return `Here is a soft follow-up for ${customer} (review before sending): "Hi ${customer}, just checking in on ${packageName}. Happy to answer questions or tweak scope if needed." Quote status: ${status}.`
   }
 
   if (/invoice/.test(lower)) {

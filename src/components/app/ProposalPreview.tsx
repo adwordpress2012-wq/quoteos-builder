@@ -1,26 +1,40 @@
 import { formatAud, getQuoteDisplayTitle } from '../../lib/quoteos/calculations'
+import { getPackagePriceById } from '../../lib/quoteos/pricing'
 import type { QuoteFormState, QuoteTotals } from '../../lib/quoteos/types'
 import { QUOTE_TYPE_OPTIONS } from '../../lib/quoteos/types'
+import { cn } from '../../lib/utils'
 
 type ProposalPreviewProps = {
   quote: QuoteFormState
   totals: QuoteTotals
   id?: string
+  /** Slightly tighter styling when embedded in the live preview column */
+  hero?: boolean
 }
 
-export function ProposalPreview({ quote, totals, id }: ProposalPreviewProps) {
+export function ProposalPreview({ quote, totals, id, hero }: ProposalPreviewProps) {
   const title = getQuoteDisplayTitle(quote)
   const quoteTypeLabel =
     QUOTE_TYPE_OPTIONS.find((o) => o.id === quote.quoteTypeId)?.label ?? 'Quote'
+  const packagePreset = getPackagePriceById(quote.quoteTypeId)
+  const packageLabel = packagePreset?.label ?? quoteTypeLabel
 
   const oneOffItems = quote.lineItems.filter((i) => i.billingType === 'one-off')
   const monthlyItems = quote.lineItems.filter((i) => i.billingType === 'monthly')
   const yearlyItems = quote.lineItems.filter((i) => i.billingType === 'yearly')
 
+  const setupTotal = Number.isFinite(totals.oneOffTotal) ? totals.oneOffTotal : 0
+  const recurringMonthly = Number.isFinite(totals.monthlyRecurringTotal)
+    ? totals.monthlyRecurringTotal
+    : 0
+
   return (
     <article
       id={id}
-      className="proposal-print-root glass-card rounded-2xl border border-blue-500/30 bg-white/[0.03] p-6 text-slate-200 shadow-[var(--qos-glow-blue),0_0_60px_rgba(139,92,246,0.12)] sm:p-8"
+      className={cn(
+        'proposal-print-root glass-card rounded-2xl border border-blue-500/30 bg-white/[0.03] text-slate-200 shadow-[var(--qos-glow-blue),0_0_60px_rgba(139,92,246,0.12)]',
+        hero ? 'p-4 sm:p-5' : 'p-6 sm:p-8',
+      )}
     >
       <header className="border-b border-blue-500/20 pb-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
@@ -53,6 +67,21 @@ export function ProposalPreview({ quote, totals, id }: ProposalPreviewProps) {
         </h1>
       </header>
 
+      {quote.quoteGenerated || quote.lineItems.length > 0 ? (
+        <section className="mt-5 rounded-xl border border-purple-500/20 bg-purple-500/8 px-4 py-3">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-purple-300">
+            Selected package
+          </p>
+          <p className="mt-1 text-lg font-semibold text-slate-50">{packageLabel}</p>
+          <p className="mt-1 text-sm text-cyan-200/90">
+            {setupTotal > 0 ? formatAud(setupTotal) : '—'} setup
+            {recurringMonthly > 0
+              ? ` · ${formatAud(recurringMonthly)}/month`
+              : ''}
+          </p>
+        </section>
+      ) : null}
+
       <section className="mt-6 grid gap-6 sm:grid-cols-2">
         <div>
           <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
@@ -75,8 +104,8 @@ export function ProposalPreview({ quote, totals, id }: ProposalPreviewProps) {
           <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
             Project
           </h2>
-          <p className="mt-2 text-sm leading-relaxed text-slate-300">
-            {quote.projectSummary || 'Scope as per line items below.'}
+          <p className="mt-2 text-sm font-medium text-slate-200">
+            {title}
           </p>
         </div>
       </section>
@@ -94,14 +123,33 @@ export function ProposalPreview({ quote, totals, id }: ProposalPreviewProps) {
         ) : null}
       </section>
 
+      {quote.projectSummary.trim() ? (
+        <section className="mt-6">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+            Implementation notes
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-slate-300">
+            {quote.projectSummary}
+          </p>
+        </section>
+      ) : null}
+
       <section className="mt-8 rounded-xl border border-cyan-500/20 bg-cyan-500/[0.06] p-4">
         <dl className="space-y-2 text-sm">
           <TotalRow label="Total" value={formatAud(totals.subtotal)} />
-          <TotalRow label="Today / setup" value={formatAud(totals.oneOffTotal)} highlight />
-          {totals.monthlyRecurringTotal > 0 ? (
+          <TotalRow
+            label="Setup total"
+            value={
+              setupTotal > 0
+                ? formatAud(setupTotal)
+                : 'Pricing missing — please set price'
+            }
+            highlight
+          />
+          {recurringMonthly > 0 ? (
             <TotalRow
-              label="Ongoing"
-              value={`${formatAud(totals.monthlyRecurringTotal)}/mo`}
+              label="Recurring total"
+              value={`${formatAud(recurringMonthly)}/mo`}
             />
           ) : null}
           {totals.yearlyRecurringTotal > 0 ? (

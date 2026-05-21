@@ -1,12 +1,13 @@
 import {
-  Check,
+  Cloud,
+  FileText,
   Globe,
-  Link2,
   Mail,
   MessageSquare,
   Pencil,
+  Phone,
   Send,
-  Sparkles,
+  Shield,
 } from 'lucide-react'
 import { formatAud } from '../../lib/quoteos/calculations'
 import {
@@ -33,9 +34,8 @@ type GeneratedQuoteCardProps = {
   quote: QuoteFormState
   totals: QuoteTotals
   setup?: SqbaSetupConfig | null
-  onReview: () => void
   onEditItems: () => void
-  onCopyLink: () => void
+  onCopyEmail: () => void
   onSendQuote: () => void
   onStatusChange: (status: QuoteStatus) => void
 }
@@ -44,9 +44,8 @@ export function GeneratedQuoteCard({
   quote,
   totals,
   setup,
-  onReview,
   onEditItems,
-  onCopyLink,
+  onCopyEmail,
   onSendQuote,
   onStatusChange,
 }: GeneratedQuoteCardProps) {
@@ -71,7 +70,7 @@ export function GeneratedQuoteCard({
   return (
     <section className="glass-card rounded-2xl p-5 shadow-[var(--qos-glow-blue)] sm:p-6">
       <p className="text-[10px] font-bold uppercase tracking-widest text-purple-300">
-        Suggested by Micah
+        Suggested quote / package
       </p>
 
       <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
@@ -154,11 +153,10 @@ export function GeneratedQuoteCard({
         </ul>
       )}
 
-      <div className="mt-5 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-        <ActionBtn icon={Sparkles} label="View proposal" onClick={onReview} primary />
+      <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3">
         <ActionBtn icon={Pencil} label="Edit Items" onClick={onEditItems} />
-        <ActionBtn icon={Link2} label="Copy Link" onClick={onCopyLink} />
-        <ActionBtn icon={Send} label="Send quote" onClick={onSendQuote} accent />
+        <ActionBtn icon={Mail} label="Copy Email" onClick={onCopyEmail} />
+        <ActionBtn icon={Send} label="Send Quote" onClick={onSendQuote} accent />
       </div>
     </section>
   )
@@ -213,15 +211,26 @@ function InclusionChip({ label }: { label: string }) {
   )
 }
 
-type InclusionIconType = 'mail' | 'chat' | 'globe' | 'check' | 'sparkles'
+type InclusionIconType =
+  | 'mail'
+  | 'chat'
+  | 'globe'
+  | 'google'
+  | 'hosting'
+  | 'sms'
+  | 'invoice'
+  | 'doc'
 
 function pickInclusionIconType(label: string): InclusionIconType {
   const lower = label.toLowerCase()
-  if (/email|mail/.test(lower)) return 'mail'
-  if (/chat|widget|micah|ai/.test(lower)) return 'chat'
-  if (/google|seo|analytics|search/.test(lower)) return 'globe'
-  if (/support|hosting|month/.test(lower)) return 'check'
-  return 'sparkles'
+  if (/email|mail|gmail/.test(lower)) return 'mail'
+  if (/sms|text message/.test(lower)) return 'sms'
+  if (/invoice/.test(lower)) return 'invoice'
+  if (/chat|widget|scw|micah/.test(lower)) return 'chat'
+  if (/google|business profile|gbp/.test(lower)) return 'google'
+  if (/support|hosting|month|cloud/.test(lower)) return 'hosting'
+  if (/website|page|site|seo/.test(lower)) return 'globe'
+  return 'doc'
 }
 
 function InclusionIcon({ type }: { type: InclusionIconType }) {
@@ -229,14 +238,27 @@ function InclusionIcon({ type }: { type: InclusionIconType }) {
   switch (type) {
     case 'mail':
       return <Mail className={className} aria-hidden="true" />
+    case 'sms':
+      return <Phone className={className} aria-hidden="true" />
+    case 'invoice':
+      return <FileText className={className} aria-hidden="true" />
     case 'chat':
       return <MessageSquare className={className} aria-hidden="true" />
+    case 'google':
+      return (
+        <span
+          className="flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-white/90 text-[8px] font-bold text-blue-700"
+          aria-hidden="true"
+        >
+          G
+        </span>
+      )
+    case 'hosting':
+      return <Shield className={className} aria-hidden="true" />
     case 'globe':
       return <Globe className={className} aria-hidden="true" />
-    case 'check':
-      return <Check className={className} aria-hidden="true" />
     default:
-      return <Sparkles className={className} aria-hidden="true" />
+      return <Cloud className={className} aria-hidden="true" />
   }
 }
 
@@ -244,13 +266,11 @@ function ActionBtn({
   icon: Icon,
   label,
   onClick,
-  primary,
   accent,
 }: {
-  icon: typeof Sparkles
+  icon: typeof Pencil
   label: string
   onClick: () => void
-  primary?: boolean
   accent?: boolean
 }) {
   return (
@@ -259,11 +279,9 @@ function ActionBtn({
       onClick={onClick}
       className={cn(
         'inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-semibold transition-all',
-        primary
-          ? 'col-span-2 border-blue-400/40 bg-gradient-to-r from-blue-600/35 to-purple-600/30 text-white shadow-[var(--qos-glow-blue)] sm:col-span-1 sm:flex-1'
-          : accent
-            ? 'border-purple-400/40 bg-gradient-to-r from-purple-600/35 to-blue-600/25 text-white'
-            : 'border-blue-500/25 bg-blue-500/8 text-cyan-200 hover:border-cyan-400/35',
+        accent
+          ? 'border-purple-400/40 bg-gradient-to-r from-purple-600/35 to-blue-600/25 text-white sm:col-span-1'
+          : 'border-blue-500/25 bg-blue-500/8 text-cyan-200 hover:border-cyan-400/35',
       )}
     >
       <Icon className="h-4 w-4" aria-hidden="true" />

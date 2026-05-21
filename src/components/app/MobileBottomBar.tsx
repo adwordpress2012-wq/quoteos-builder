@@ -25,7 +25,7 @@ export function MobileBottomBar({
           onClick={onGenerate}
           primary
         />
-        <BarButton icon={Eye} label="Review" onClick={onReview} />
+        <BarButton icon={Eye} label="Preview" onClick={onReview} />
         <BarButton icon={Sparkles} label="Micah" onClick={onOpenMicah} />
       </div>
     </div>

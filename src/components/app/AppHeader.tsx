@@ -8,7 +8,6 @@ type AppHeaderProps = {
 
 export function AppHeader({ showBuilderNav = true }: AppHeaderProps) {
   const location = useLocation()
-  const onBuilder = location.pathname.startsWith('/app/builder')
   const onDashboard =
     location.pathname === '/app' || location.pathname === '/app/dashboard'
 
@@ -28,7 +27,7 @@ export function AppHeader({ showBuilderNav = true }: AppHeaderProps) {
                 QuoteOS SQBA
               </span>
               <span className="text-[10px] text-slate-500 sm:text-[11px]">
-                Smart Quote Builder
+                Smart Quote Builder Assistant
               </span>
             </div>
           </Link>
@@ -39,18 +38,6 @@ export function AppHeader({ showBuilderNav = true }: AppHeaderProps) {
             className="order-3 flex w-full justify-center gap-1 sm:order-none sm:w-auto"
             aria-label="App navigation"
           >
-            <Link
-              to="/app/builder"
-              className={cn(
-                'rounded-full px-4 py-1.5 text-xs font-medium transition-colors sm:text-sm',
-                onBuilder
-                  ? 'border border-blue-500/40 bg-blue-500/15 text-cyan-200 shadow-[var(--qos-glow-blue)]'
-                  : 'text-slate-400 hover:bg-white/[0.04] hover:text-cyan-200',
-              )}
-              aria-current={onBuilder ? 'page' : undefined}
-            >
-              SQBA
-            </Link>
             <Link
               to="/app"
               className={cn(

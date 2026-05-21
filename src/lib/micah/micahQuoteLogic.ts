@@ -179,6 +179,38 @@ export function buildMicahAssistantSnapshot(
   }
 }
 
+export function getMicahContextualTip(
+  quote: QuoteFormState,
+  setup?: SqbaSetupConfig | null,
+): string {
+  const validation = validateQuotePricing(quote)
+  if (!validation.canSend) {
+    return 'Pricing missing — please set price.'
+  }
+  if (quote.quoteTypeId === 'dos-website-growth') {
+    return 'Growth package has $1,990 setup + $49/month.'
+  }
+  if (quote.quoteGenerated && quote.quoteStatus === 'draft') {
+    return 'This quote is ready to send.'
+  }
+  if (
+    quote.quoteGenerated &&
+    (quote.quoteStatus === 'sent' || quote.quoteStatus === 'follow-up')
+  ) {
+    return 'Want me to prepare a follow-up?'
+  }
+  if (
+    quote.quoteGenerated &&
+    !quote.lineItems.some((item) => item.billingType !== 'one-off')
+  ) {
+    return 'Consider adding support for recurring revenue.'
+  }
+  if (setup?.completed) {
+    return 'Ask me about price, scope, or what to send for this quote.'
+  }
+  return 'Tell me what you are quoting and I will help package it.'
+}
+
 export function runMicahQuickAction(
   action: MicahActionId,
   quote: QuoteFormState,

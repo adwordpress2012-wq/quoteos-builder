@@ -79,7 +79,7 @@ export function ManualHybridSection({ onSelectPreset }: ManualHybridSectionProps
         className="mt-2.5 inline-flex min-h-[40px] items-center justify-center gap-1.5 rounded-lg border border-blue-400/30 bg-blue-500/8 px-3 text-xs font-semibold text-cyan-200 transition-colors hover:border-cyan-400/40 disabled:opacity-40"
       >
         <Plus className="h-3.5 w-3.5" aria-hidden="true" />
-        Build quote
+        Add Item
       </button>
     </section>
   )

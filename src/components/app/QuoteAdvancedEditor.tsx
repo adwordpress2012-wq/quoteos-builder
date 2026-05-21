@@ -56,7 +56,7 @@ export function QuoteAdvancedEditor({
   return (
     <div id="quote-advanced-editor">
       <BuilderAccordion
-        title="Edit quote details (Pricing, Terms, Payment, Notes…)"
+        title="Edit quote details"
         defaultOpen={defaultOpen}
       >
         <div className="space-y-6">
