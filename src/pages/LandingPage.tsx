@@ -8,6 +8,7 @@ import { SqbaBackend } from '../components/sections/SqbaBackend'
 import { Pricing } from '../components/sections/Pricing'
 import { PaymentInvoice } from '../components/sections/PaymentInvoice'
 import { FinalCta } from '../components/sections/FinalCta'
+import { MicahScwWidget } from '../components/scw/MicahScwWidget'
 
 export function LandingPage() {
   return (
@@ -24,6 +25,7 @@ export function LandingPage() {
         <FinalCta />
       </main>
       <Footer />
+      <MicahScwWidget />
     </div>
   )
 }

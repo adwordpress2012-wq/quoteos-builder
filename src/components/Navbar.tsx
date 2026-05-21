@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Menu, X } from 'lucide-react'
 import { QuoteOsLogo } from './brand/QuoteOsLogo'
 import { MarketingButton } from './ui/MarketingButton'
-import { BUILDER_URL, BOOK_DEMO_MAILTO, navLinks } from '../lib/marketing/constants'
+import { BOOK_DEMO_URL, navLinks } from '../lib/marketing/constants'
 
 export function Navbar() {
   const [open, setOpen] = useState(false)
@@ -34,11 +34,22 @@ export function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-2 sm:flex sm:gap-3">
-          <MarketingButton href={BOOK_DEMO_MAILTO} variant="outline" size="sm">
+          <MarketingButton
+            href={BOOK_DEMO_URL}
+            variant="outline"
+            size="sm"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Book Demo
           </MarketingButton>
-          <MarketingButton href={BUILDER_URL} size="sm">
-            Start Free Trial
+          <MarketingButton
+            href={BOOK_DEMO_URL}
+            size="sm"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Book Free Demo
           </MarketingButton>
         </div>
 
@@ -77,16 +88,20 @@ export function Navbar() {
           </nav>
           <div className="mt-4 flex flex-col gap-2">
             <MarketingButton
-              href={BUILDER_URL}
+              href={BOOK_DEMO_URL}
               className="w-full"
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={() => setOpen(false)}
             >
-              Start Free Trial
+              Book Free Demo
             </MarketingButton>
             <MarketingButton
-              href={BOOK_DEMO_MAILTO}
+              href={BOOK_DEMO_URL}
               variant="outline"
               className="w-full"
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={() => setOpen(false)}
             >
               Book Demo

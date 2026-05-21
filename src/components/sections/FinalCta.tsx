@@ -1,6 +1,6 @@
 import { ArrowRight } from 'lucide-react'
 import { MarketingButton } from '../ui/MarketingButton'
-import { BOOK_DEMO_MAILTO } from '../../lib/marketing/constants'
+import { BOOK_DEMO_URL } from '../../lib/marketing/constants'
 
 export function FinalCta() {
   return (
@@ -14,10 +14,12 @@ export function FinalCta() {
           keeps your follow-ups on track.
         </p>
         <MarketingButton
-          href={BOOK_DEMO_MAILTO}
+          href={BOOK_DEMO_URL}
           variant="secondary"
           size="lg"
           className="mt-8"
+          target="_blank"
+          rel="noopener noreferrer"
         >
           Book a QuoteOS demo
           <ArrowRight className="h-4 w-4" aria-hidden="true" />

@@ -1,7 +1,11 @@
 import { Check } from 'lucide-react'
 import { SectionHeading } from '../marketing/SectionHeading'
 import { MarketingButton } from '../ui/MarketingButton'
-import { BOOK_DEMO_MAILTO } from '../../lib/marketing/constants'
+import { BOOK_DEMO_MAILTO, BOOK_DEMO_URL } from '../../lib/marketing/constants'
+
+function pricingCtaHref(cta: string): string {
+  return cta === 'Talk to Us' ? BOOK_DEMO_MAILTO : BOOK_DEMO_URL
+}
 
 type PricingTier = {
   name: string
@@ -20,14 +24,14 @@ const tiers: PricingTier[] = [
     monthly: '$97/month',
     annual: '$390/year hosting & support',
     features: [
-      'One-page tradie website',
+      'One-page tradie landing page (included)',
       'Micah SCW',
       'Basic SQBA quote workspace',
       'Email notifications',
       'PDF quote/invoice',
       'Booking link setup',
     ],
-    cta: 'Start Free Trial',
+    cta: 'Book Demo',
   },
   {
     name: 'Growth Tradie',
@@ -35,6 +39,7 @@ const tiers: PricingTier[] = [
     monthly: '$297/month',
     annual: '$490/year hosting & support',
     features: [
+      'One-page tradie landing page (included)',
       'Custom branded tradie website',
       'Micah SCW',
       'SQBA quote assistant',
@@ -62,7 +67,7 @@ const tiers: PricingTier[] = [
       'Custom integrations',
       'Priority support',
     ],
-    cta: 'Book Demo',
+    cta: 'Talk to Us',
   },
 ]
 
@@ -116,9 +121,12 @@ export function Pricing() {
                 ))}
               </ul>
               <MarketingButton
-                href={tier.cta === 'Start Free Trial' ? '/app/builder' : BOOK_DEMO_MAILTO}
+                href={pricingCtaHref(tier.cta)}
                 variant={tier.highlighted ? 'primary' : 'outline'}
                 className="mt-6 w-full"
+                {...(tier.cta !== 'Talk to Us'
+                  ? { target: '_blank', rel: 'noopener noreferrer' }
+                  : {})}
               >
                 {tier.cta}
               </MarketingButton>

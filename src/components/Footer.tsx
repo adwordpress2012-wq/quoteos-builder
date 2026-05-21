@@ -1,5 +1,5 @@
 import { QuoteOsLogo } from './brand/QuoteOsLogo'
-import { BOOK_DEMO_MAILTO, BUILDER_URL, DOS_URL, navLinks } from '../lib/marketing/constants'
+import { BOOK_DEMO_MAILTO, BOOK_DEMO_URL, DOS_URL, navLinks } from '../lib/marketing/constants'
 
 export function Footer() {
   const year = new Date().getFullYear()
@@ -33,10 +33,12 @@ export function Footer() {
               </a>
             ))}
             <a
-              href={BUILDER_URL}
+              href={BOOK_DEMO_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="font-medium text-[#475569] transition-colors hover:text-[#1d4ed8]"
             >
-              Start Free Trial
+              Book Free Demo
             </a>
             <a
               href={BOOK_DEMO_MAILTO}

@@ -3,23 +3,23 @@ import { SectionHeading } from '../marketing/SectionHeading'
 const chatMessages = [
   {
     role: 'assistant' as const,
-    text: "G'day — I'm Micah from Luke's Plumbing. What can we help with today?",
+    text: "Hi, I'm Micah. Tell me what plumbing job you need help with and I'll help prepare the details for a quote.",
   },
   {
     role: 'customer' as const,
-    text: 'Hot water system is leaking. Need a quote for replacement.',
+    text: 'I have a leaking tap in my kitchen.',
   },
   {
     role: 'assistant' as const,
-    text: 'No worries. Is it gas or electric? And roughly how old is the unit?',
+    text: 'No problem. I can help prepare this for Luke. What suburb are you in, and is it urgent today?',
   },
   {
     role: 'customer' as const,
-    text: "Electric, about 8 years old. We're in Penrith.",
+    text: "Penrith. Not urgent, but we'd like it looked at this week.",
   },
   {
     role: 'assistant' as const,
-    text: "Thanks — I've sent this to Luke's team. You'll hear back shortly with a quote.",
+    text: "Thanks, I've got the details. Luke can review this and send you a quote or booking confirmation shortly.",
   },
 ]
 
@@ -31,7 +31,7 @@ export function MicahScw() {
           align="left"
           eyebrow="Micah SCW"
           title="Your website chat that actually captures good job info"
-          description="Micah sits on your website and collects customer enquiries, asks the right job questions, and sends everything into SQBA — so you're not chasing missing details by text at 8pm."
+          description="Micah sits on your website and collects customer enquiries, asks the right job questions, and prepares everything for SQBA so the tradie can review before sending anything."
         />
 
         <div
@@ -73,7 +73,7 @@ export function MicahScw() {
 
           <div className="flex gap-2 border-t border-[#e2e8f0] bg-white p-3">
             <div className="flex-1 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2 text-sm text-[#94a3b8]">
-              Type your message…
+              Type your message...
             </div>
             <span className="inline-flex h-10 items-center rounded-lg bg-[#1d4ed8] px-4 text-sm font-medium text-white">
               Send

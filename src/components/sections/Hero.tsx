@@ -7,7 +7,7 @@ import {
   FileText,
 } from 'lucide-react'
 import { MarketingButton } from '../ui/MarketingButton'
-import { BUILDER_URL } from '../../lib/marketing/constants'
+import { BOOK_DEMO_URL } from '../../lib/marketing/constants'
 
 const flowSteps = [
   {
@@ -69,8 +69,14 @@ export function Hero() {
           </p>
 
           <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center sm:gap-4">
-            <MarketingButton href={BUILDER_URL} size="lg" className="w-full sm:w-auto">
-              Start Free Trial
+            <MarketingButton
+              href={BOOK_DEMO_URL}
+              size="lg"
+              className="w-full sm:w-auto"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Book Free Demo
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </MarketingButton>
             <MarketingButton
