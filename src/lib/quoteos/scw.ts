@@ -17,6 +17,7 @@ export type ScwLeadDraft = {
   customerName: string
   phone: string
   email: string
+  emailSkipped: boolean
   suburb: string
   jobType: PlumbingJobType | ''
   urgency: string
@@ -32,6 +33,7 @@ export type SqbaPreparedLead = {
   lead: ScwLeadDraft
   sqbaActions: string[]
   notificationDrafts: {
+    internalNotification: string
     resendEmailToTradie: string
     twilioSmsOrWhatsAppToTradie: string
   }
@@ -60,6 +62,7 @@ export const emptyScwLeadDraft: ScwLeadDraft = {
   customerName: '',
   phone: '',
   email: '',
+  emailSkipped: false,
   suburb: '',
   jobType: '',
   urgency: '',
@@ -85,9 +88,24 @@ const FIELD_ORDER: IntakeField[] = [
 
 const EMAIL_PATTERN = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i
 const PHONE_PATTERN = /(?:\+?61|0)?(?:\s?\d){8,10}/
+const EMAIL_SKIP_PATTERN = /^(skip|sms only|call me|no email|phone only|call only)$/i
 
 function cleanValue(value: string): string {
   return value.trim().replace(/\s+/g, ' ')
+}
+
+export function isEmailSkipRequest(value: string): boolean {
+  return EMAIL_SKIP_PATTERN.test(cleanValue(value))
+}
+
+export function extractValidEmail(value: string): string {
+  return cleanValue(value).match(EMAIL_PATTERN)?.[0] ?? ''
+}
+
+export function extractValidPhone(value: string): string {
+  const phone = cleanValue(value).match(PHONE_PATTERN)?.[0] ?? ''
+  const digits = phone.replace(/\D/g, '')
+  return digits.length >= 8 && digits.length <= 12 ? phone : ''
 }
 
 export function detectPlumbingJobType(text: string): PlumbingJobType | '' {
@@ -130,8 +148,8 @@ export function updateScwLeadFromMessage(
   message: string,
 ): ScwLeadDraft {
   const text = cleanValue(message)
-  const email = text.match(EMAIL_PATTERN)?.[0] ?? ''
-  const phone = text.match(PHONE_PATTERN)?.[0] ?? ''
+  const email = extractValidEmail(text)
+  const phone = extractValidPhone(text)
   const inferredJobType = detectPlumbingJobType(text)
   const inferredUrgency = detectUrgency(text)
   const updated: ScwLeadDraft = {
@@ -162,7 +180,13 @@ export function updateScwLeadFromMessage(
       updated.phone = phone || text
       break
     case 'email':
-      updated.email = email || text
+      if (isEmailSkipRequest(text)) {
+        updated.email = ''
+        updated.emailSkipped = true
+      } else if (email) {
+        updated.email = email
+        updated.emailSkipped = false
+      }
       break
     case 'preferredTime':
       updated.preferredTime = text
@@ -189,6 +213,7 @@ export function getNextMissingScwField(lead: ScwLeadDraft): IntakeField | null {
   return (
     FIELD_ORDER.find((field) => {
       if (field === 'permissionToContact') return lead.permissionToContact === null
+      if (field === 'email') return !lead.email && !lead.emailSkipped
       return !lead[field]
     }) ?? null
   )
@@ -211,7 +236,7 @@ export function getScwQuestionForField(field: IntakeField, lead: ScwLeadDraft): 
     case 'phone':
       return 'What phone number should Luke use if he needs to confirm details?'
     case 'email':
-      return 'What email should the team use for the quote or booking confirmation?'
+      return 'What email should the team use for the quote? You can type skip if you prefer SMS/call only.'
     case 'preferredTime':
       return 'Would you like to request a time for Luke to attend? You can type a preferred day or time.'
     case 'permissionToContact':
@@ -223,12 +248,14 @@ export function getQuoteIntakeSummary(lead: ScwLeadDraft): string {
   return [
     'Quote intake summary',
     `Customer: ${lead.customerName || 'Not provided'}`,
-    `Contact: ${lead.phone || 'No phone'} / ${lead.email || 'No email'}`,
+    `Contact: ${lead.phone || 'No phone'} / ${
+      lead.email || (lead.emailSkipped ? 'Email skipped' : 'No email')
+    }`,
     `Job type: ${lead.jobType || 'Other'}`,
     `Suburb: ${lead.suburb || 'Not provided'}`,
     `Urgency: ${lead.urgency || 'Not provided'}`,
     `Job notes: ${lead.jobDescription || 'Not provided'}`,
-    `Suggested next step: Luke will review and prepare a quote or booking confirmation.`,
+    `Suggested next step: Luke will review and prepare the quote or booking request response.`,
     `Booking preference: ${lead.preferredTime || 'Not requested'}`,
     `SQBA status: quote draft ${lead.quoteDraftStatus}`,
   ].join('\n')
@@ -239,8 +266,11 @@ export function prepareSqbaLeadFromScwConversation(
 ): SqbaPreparedLead {
   const readyLead: ScwLeadDraft = {
     ...lead,
+    source: 'quoteos_scw',
+    businessType: 'plumber',
     quoteDraftStatus: 'ready',
     notificationStatus: 'pending',
+    channel: 'website_chat',
   }
   const jobType = readyLead.jobType || 'plumbing job'
   const suburb = readyLead.suburb || 'unknown suburb'
@@ -258,6 +288,7 @@ export function prepareSqbaLeadFromScwConversation(
       'Prepare PDF quote after tradie review',
     ],
     notificationDrafts: {
+      internalNotification: notificationCopy,
       resendEmailToTradie: notificationCopy,
       twilioSmsOrWhatsAppToTradie: notificationCopy,
     },

@@ -33,16 +33,7 @@ export function Navbar() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-2 sm:flex sm:gap-3">
-          <MarketingButton
-            href={BOOK_DEMO_URL}
-            variant="outline"
-            size="sm"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Book Demo
-          </MarketingButton>
+        <div className="hidden items-center sm:flex">
           <MarketingButton
             href={BOOK_DEMO_URL}
             size="sm"
@@ -86,7 +77,7 @@ export function Navbar() {
               </a>
             ))}
           </nav>
-          <div className="mt-4 flex flex-col gap-2">
+          <div className="mt-4">
             <MarketingButton
               href={BOOK_DEMO_URL}
               className="w-full"
@@ -95,16 +86,6 @@ export function Navbar() {
               onClick={() => setOpen(false)}
             >
               Book Free Demo
-            </MarketingButton>
-            <MarketingButton
-              href={BOOK_DEMO_URL}
-              variant="outline"
-              className="w-full"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => setOpen(false)}
-            >
-              Book Demo
             </MarketingButton>
           </div>
         </div>
