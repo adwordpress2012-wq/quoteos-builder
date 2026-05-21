@@ -2,6 +2,35 @@
 
 @theme {
   --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* QuoteOS premium blue SaaS palette (Tailwind theme) */
+  --color-navy-950: #050510;
+  --color-navy-900: #0a0f1e;
+  --color-navy-850: #0d1528;
+  --color-navy-800: #111b33;
+  --color-blue-electric: #3b82f6;
+  --color-blue-bright: #60a5fa;
+  --color-cyan-glow: #22d3ee;
+  --color-cyan-soft: #06b6d4;
+  --color-purple-glow: #8b5cf6;
+  --color-teal-accent: #14b8a6;
+}
+
+/*
+ * QuoteOS design tokens — reuse for app.quoteos.com.au / Smart Quote Builder.
+ * Keep marketing site and product UI visually aligned.
+ */
+:root {
+  --qos-bg: #050510;
+  --qos-panel: rgba(15, 15, 25, 0.7);
+  --qos-panel-soft: rgba(255, 255, 255, 0.05);
+  --qos-blue: #3b82f6;
+  --qos-cyan: #06b6d4;
+  --qos-purple: #8b5cf6;
+  --qos-teal: #14b8a6;
+  --qos-border: rgba(59, 130, 246, 0.3);
+  --qos-glow-blue: 0 0 20px rgba(59, 130, 246, 0.5);
+  --qos-glow-purple: 0 0 20px rgba(139, 92, 246, 0.5);
 }
 
 @layer base {
@@ -13,7 +42,7 @@
     margin: 0;
     min-height: 100svh;
     font-family: var(--font-sans);
-    background-color: #07080d;
+    background-color: var(--qos-bg);
     color: #94a3b8;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -24,7 +53,7 @@
   }
 
   ::selection {
-    background-color: rgba(124, 58, 237, 0.35);
+    background-color: rgba(59, 130, 246, 0.35);
     color: #f8fafc;
   }
 }
@@ -52,6 +81,129 @@
 
   .animation-delay-500 {
     animation-delay: 0.5s;
+  }
+
+  .bg-quoteos-page {
+    background-color: var(--qos-bg);
+    background-image:
+      radial-gradient(ellipse 90% 55% at 50% -8%, rgba(59, 130, 246, 0.22), transparent 58%),
+      radial-gradient(ellipse 45% 55% at 0% 35%, rgba(139, 92, 246, 0.14), transparent 55%),
+      radial-gradient(ellipse 45% 55% at 100% 35%, rgba(139, 92, 246, 0.14), transparent 55%),
+      radial-gradient(ellipse 70% 40% at 50% 100%, rgba(6, 182, 212, 0.06), transparent 50%);
+  }
+
+  .bg-quoteos-noise {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 128px 128px;
+  }
+
+  .bg-quoteos-grid {
+    background-image:
+      linear-gradient(rgba(59, 130, 246, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59, 130, 246, 0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 20%, transparent 75%);
+  }
+
+  .glass-card {
+    border: 1px solid var(--qos-border);
+    background: linear-gradient(
+      180deg,
+      var(--qos-panel-soft) 0%,
+      rgba(255, 255, 255, 0.02) 100%
+    );
+    background-color: var(--qos-panel);
+    backdrop-filter: blur(16px);
+  }
+
+  .glass-card-inner {
+    border: 1px solid rgba(59, 130, 246, 0.18);
+    background: rgba(10, 15, 30, 0.75);
+    backdrop-filter: blur(12px);
+  }
+
+  .glass-feature-card {
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    background: linear-gradient(
+      165deg,
+      rgba(15, 15, 28, 0.85) 0%,
+      rgba(8, 10, 22, 0.92) 100%
+    );
+    backdrop-filter: blur(14px);
+  }
+
+  .text-gradient-quoteos {
+    background-image: linear-gradient(
+      90deg,
+      #a78bfa 0%,
+      #60a5fa 40%,
+      #22d3ee 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .text-gradient-quoteos-cyan {
+    background-image: linear-gradient(90deg, #60a5fa 0%, #22d3ee 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .text-gradient-quoteos-purple-cyan {
+    background-image: linear-gradient(90deg, #a78bfa 0%, #06b6d4 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .glow-blue-sm {
+    box-shadow: var(--qos-glow-blue);
+  }
+
+  .glow-blue-md {
+    box-shadow:
+      0 0 32px rgba(59, 130, 246, 0.45),
+      0 0 64px rgba(6, 182, 212, 0.15);
+  }
+
+  .glow-purple-sm {
+    box-shadow: var(--qos-glow-purple);
+  }
+
+  .glow-dashboard {
+    box-shadow:
+      0 0 0 1px rgba(59, 130, 246, 0.35),
+      0 0 48px rgba(59, 130, 246, 0.35),
+      0 24px 80px rgba(0, 0, 0, 0.5),
+      0 0 100px rgba(6, 182, 212, 0.12);
+  }
+
+  .icon-block-purple {
+    border: 1px solid rgba(139, 92, 246, 0.35);
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.25) 0%, rgba(59, 130, 246, 0.15) 100%);
+    box-shadow: 0 0 24px rgba(139, 92, 246, 0.2);
+  }
+
+  .icon-block-blue {
+    border: 1px solid rgba(59, 130, 246, 0.35);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.28) 0%, rgba(6, 182, 212, 0.12) 100%);
+    box-shadow: 0 0 24px rgba(59, 130, 246, 0.25);
+  }
+
+  .chip-industry {
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    background: rgba(5, 5, 16, 0.8);
+  }
+
+  .chip-industry-active {
+    border: 1px solid rgba(59, 130, 246, 0.55);
+    background: rgba(59, 130, 246, 0.1);
+    box-shadow:
+      0 0 20px rgba(59, 130, 246, 0.35),
+      inset 0 0 12px rgba(59, 130, 246, 0.08);
   }
 }
 

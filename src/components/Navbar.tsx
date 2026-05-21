@@ -8,13 +8,13 @@ const navLinks = [
 
 export function Navbar() {
   return (
-    <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-[#07080d]/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-[var(--qos-border)] bg-[var(--qos-bg)]/90 shadow-[inset_0_-1px_0_rgba(59,130,246,0.08)] backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5 sm:h-[4.25rem] sm:px-6 lg:px-8">
         <a
           href="#"
-          className="group flex shrink-0 items-center gap-2.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-violet-400"
+          className="group flex shrink-0 items-center gap-2.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-400"
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-violet-500/30 bg-gradient-to-br from-violet-600/20 to-cyan-500/10 text-sm font-bold tracking-tight text-violet-300 shadow-[0_0_20px_rgba(124,58,237,0.2)] transition-shadow duration-300 group-hover:shadow-[0_0_28px_rgba(124,58,237,0.35)]">
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-blue-500/40 bg-gradient-to-br from-blue-600/30 to-purple-500/20 text-sm font-bold tracking-tight text-cyan-200 shadow-[var(--qos-glow-blue)] transition-all duration-300 group-hover:border-blue-400/55 group-hover:shadow-[0_0_32px_rgba(59,130,246,0.5),0_0_20px_rgba(139,92,246,0.2)]">
             Q
           </span>
           <div className="text-left leading-tight">
@@ -22,7 +22,7 @@ export function Navbar() {
               QuoteOS
             </span>
             <span className="hidden text-[11px] text-slate-500 sm:block">
-              Powered by DOS
+              by DOS
             </span>
           </div>
         </a>
@@ -35,7 +35,7 @@ export function Navbar() {
             <a
               key={link.href}
               href={link.href}
-              className="text-sm text-slate-400 transition-colors duration-200 hover:text-slate-100"
+              className="text-sm text-slate-400 transition-colors duration-200 hover:text-cyan-200"
             >
               {link.label}
             </a>

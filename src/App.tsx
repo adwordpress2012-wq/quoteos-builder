@@ -9,7 +9,7 @@ import { SectionDivider } from './components/SectionDivider'
 
 function App() {
   return (
-    <div className="min-h-svh bg-[#07080d] text-slate-300 antialiased">
+    <div className="min-h-svh bg-quoteos-page text-slate-300 antialiased">
       <Navbar />
       <main>
         <Hero />

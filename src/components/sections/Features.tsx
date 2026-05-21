@@ -13,6 +13,7 @@ type Feature = {
   title: string
   description: string
   badge?: string
+  iconVariant?: 'purple' | 'blue'
 }
 
 const features: Feature[] = [
@@ -21,30 +22,35 @@ const features: Feature[] = [
     title: 'Smart Quote Builder',
     description:
       'Build structured, accurate quotes with line items, margins and scope — ready to send while you are still on site.',
+    iconVariant: 'purple',
   },
   {
     icon: PenLine,
     title: 'Micah Writing Assistant',
     description:
       'AI copy tuned for tradies and consultants. Professional tone without sounding like a generic template.',
+    iconVariant: 'blue',
   },
   {
     icon: FileText,
     title: 'Professional PDF Quotes',
     description:
       'Branded PDF proposals that look premium on mobile and desktop — the kind clients forward to decision-makers.',
+    iconVariant: 'purple',
   },
   {
     icon: Mail,
     title: 'AI Email Drafts',
     description:
       'Context-aware outreach and revisions so every message is clear, timely and on-brand for your business.',
+    iconVariant: 'blue',
   },
   {
     icon: Bell,
     title: 'Follow-Up Reminders',
     description:
       'Never let a warm lead go cold. Automated nudges keep opportunities moving toward a yes.',
+    iconVariant: 'purple',
   },
   {
     icon: CreditCard,
@@ -52,6 +58,7 @@ const features: Feature[] = [
     description:
       'Secure deposit collection built into your quote flow — lock in commitment before you mobilise.',
     badge: 'Coming soon',
+    iconVariant: 'blue',
   },
 ]
 
@@ -63,11 +70,14 @@ export function Features() {
     >
       <div className="mx-auto max-w-6xl">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-medium uppercase tracking-wider text-violet-400">
+          <p className="text-sm font-medium uppercase tracking-wider text-cyan-400">
             Platform
           </p>
           <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-50 sm:text-3xl">
-            Everything you need from quote to close
+            Everything you need to{' '}
+            <span className="text-gradient-quoteos-purple-cyan">
+              quote, send and win.
+            </span>
           </h2>
           <p className="mt-4 text-base leading-relaxed text-slate-400">
             One operating system for proposals, communication and follow-through
@@ -79,14 +89,20 @@ export function Features() {
           {features.map((feature) => (
             <li
               key={feature.title}
-              className="group relative flex flex-col rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-transparent p-6 sm:p-7 transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-500/25 hover:shadow-[0_12px_48px_rgba(124,58,237,0.12)]"
+              className="group glass-feature-card relative flex flex-col rounded-2xl p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-400/40 hover:shadow-[var(--qos-glow-blue),0_12px_48px_rgba(0,0,0,0.35)] sm:p-7"
             >
               {feature.badge ? (
                 <span className="absolute right-5 top-5 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wide text-amber-200/90">
                   {feature.badge}
                 </span>
               ) : null}
-              <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-violet-600/10 text-violet-300 shadow-[0_0_24px_rgba(124,58,237,0.15)] transition-all duration-300 group-hover:shadow-[0_0_32px_rgba(124,58,237,0.25)]">
+              <div
+                className={`mb-5 flex h-11 w-11 items-center justify-center rounded-xl text-sky-200 transition-all duration-300 group-hover:scale-105 ${
+                  feature.iconVariant === 'purple'
+                    ? 'icon-block-purple'
+                    : 'icon-block-blue'
+                }`}
+              >
                 <feature.icon className="h-5 w-5" aria-hidden="true" />
               </div>
               <h3 className="pr-20 text-lg font-semibold text-slate-50">

@@ -5,14 +5,23 @@ export function CtaBanner() {
   return (
     <section className="px-5 pb-20 sm:px-6 sm:pb-24 lg:px-8">
       <div className="mx-auto max-w-6xl">
-        <div className="relative overflow-hidden rounded-2xl border border-violet-500/25 bg-gradient-to-br from-violet-950/80 via-[#0f1118] to-[#07080d] px-6 py-12 text-center sm:px-12 sm:py-14">
+        <div className="glass-card relative overflow-hidden rounded-2xl border border-blue-500/35 px-6 py-12 text-center shadow-[var(--qos-glow-blue),0_0_80px_rgba(139,92,246,0.15)] sm:px-12 sm:py-14">
           <div
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(124,58,237,0.25),transparent_55%)]"
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(59,130,246,0.32),transparent_55%)]"
+            aria-hidden="true"
+          />
+          <div
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(139,92,246,0.14),transparent_45%)]"
+            aria-hidden="true"
+          />
+          <div
+            className="pointer-events-none absolute bottom-0 left-0 h-40 w-40 bg-[radial-gradient(circle,rgba(6,182,212,0.12),transparent_70%)]"
             aria-hidden="true"
           />
           <div className="relative">
             <h2 className="text-2xl font-semibold tracking-tight text-slate-50 sm:text-3xl">
-              Ready to quote smarter and win more work?
+              Ready to quote smarter and{' '}
+              <span className="text-gradient-quoteos-cyan">win more work?</span>
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-slate-400">
               Launch QuoteOS and put AI to work on your quotes, proposals and
