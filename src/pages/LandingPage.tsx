@@ -1,25 +1,27 @@
 import { Navbar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
 import { Hero } from '../components/sections/Hero'
-import { Benefits } from '../components/sections/Benefits'
-import { Features } from '../components/sections/Features'
-import { Industries } from '../components/sections/Industries'
-import { CtaBanner } from '../components/sections/CtaBanner'
-import { SectionDivider } from '../components/SectionDivider'
+import { TrustStrip } from '../components/sections/TrustStrip'
+import { HowItWorks } from '../components/sections/HowItWorks'
+import { MicahScw } from '../components/sections/MicahScw'
+import { SqbaBackend } from '../components/sections/SqbaBackend'
+import { Pricing } from '../components/sections/Pricing'
+import { PaymentInvoice } from '../components/sections/PaymentInvoice'
+import { FinalCta } from '../components/sections/FinalCta'
 
 export function LandingPage() {
   return (
-    <div className="min-h-svh bg-quoteos-page text-slate-300 antialiased">
+    <div className="min-h-svh bg-white text-[#334155] antialiased">
       <Navbar />
       <main>
         <Hero />
-        <SectionDivider />
-        <Benefits />
-        <SectionDivider />
-        <Features />
-        <SectionDivider />
-        <Industries />
-        <CtaBanner />
+        <TrustStrip />
+        <HowItWorks />
+        <MicahScw />
+        <SqbaBackend />
+        <Pricing />
+        <PaymentInvoice />
+        <FinalCta />
       </main>
       <Footer />
     </div>

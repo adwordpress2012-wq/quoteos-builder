@@ -1,64 +1,99 @@
-import { Button } from './ui/Button'
-
-const navLinks = [
-  { label: 'Features', href: '#features' },
-  { label: 'Industries', href: '#industries' },
-  { label: 'Why QuoteOS', href: '#benefits' },
-]
+import { useState } from 'react'
+import { Menu, X } from 'lucide-react'
+import { QuoteOsLogo } from './brand/QuoteOsLogo'
+import { MarketingButton } from './ui/MarketingButton'
+import { BUILDER_URL, BOOK_DEMO_MAILTO, navLinks } from '../lib/marketing/constants'
 
 export function Navbar() {
+  const [open, setOpen] = useState(false)
+
   return (
-    <header className="sticky top-0 z-50 border-b border-[var(--qos-border)] bg-[var(--qos-bg)]/90 shadow-[inset_0_-1px_0_rgba(59,130,246,0.08)] backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-[#e2e8f0] bg-white/95 shadow-sm backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5 sm:h-[4.25rem] sm:px-6 lg:px-8">
         <a
-          href="/"
-          className="group flex shrink-0 items-center gap-2.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-400"
+          href="#top"
+          className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#2563eb]"
+          onClick={() => setOpen(false)}
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-blue-500/40 bg-gradient-to-br from-blue-600/30 to-purple-500/20 text-sm font-bold tracking-tight text-cyan-200 shadow-[var(--qos-glow-blue)] transition-all duration-300 group-hover:border-blue-400/55 group-hover:shadow-[0_0_32px_rgba(59,130,246,0.5),0_0_20px_rgba(139,92,246,0.2)]">
-            Q
-          </span>
-          <div className="text-left leading-tight">
-            <span className="block text-base font-semibold tracking-tight text-slate-50">
-              QuoteOS
-            </span>
-            <span className="hidden text-[11px] text-slate-500 sm:block">
-              by DOS
-            </span>
-          </div>
+          <QuoteOsLogo />
         </a>
 
         <nav
-          className="hidden items-center gap-8 md:flex"
+          className="hidden items-center gap-6 md:flex"
           aria-label="Main navigation"
         >
           {navLinks.map((link) => (
             <a
               key={link.href}
               href={link.href}
-              className="text-sm text-slate-400 transition-colors duration-200 hover:text-cyan-200"
+              className="text-sm font-medium text-[#475569] transition-colors hover:text-[#1d4ed8]"
             >
               {link.label}
             </a>
           ))}
         </nav>
 
-        <div className="flex items-center gap-2 sm:gap-3">
-          <Button
-            href="https://directiveos.com.au"
-            target="_blank"
-            rel="noopener noreferrer"
-            variant="ghost"
-            size="sm"
-            className="hidden min-[400px]:inline-flex"
-          >
-            <span className="sm:hidden">DOS</span>
-            <span className="hidden sm:inline">Powered by DOS</span>
-          </Button>
-          <Button href="/app/builder" variant="primary" size="sm">
-            Launch App
-          </Button>
+        <div className="hidden items-center gap-2 sm:flex sm:gap-3">
+          <MarketingButton href={BOOK_DEMO_MAILTO} variant="outline" size="sm">
+            Book Demo
+          </MarketingButton>
+          <MarketingButton href={BUILDER_URL} size="sm">
+            Start Free Trial
+          </MarketingButton>
         </div>
+
+        <button
+          type="button"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#e2e8f0] text-[#0f2744] md:hidden"
+          aria-expanded={open}
+          aria-controls="mobile-nav"
+          aria-label={open ? 'Close menu' : 'Open menu'}
+          onClick={() => setOpen((v) => !v)}
+        >
+          {open ? (
+            <X className="h-5 w-5" aria-hidden="true" />
+          ) : (
+            <Menu className="h-5 w-5" aria-hidden="true" />
+          )}
+        </button>
       </div>
+
+      {open ? (
+        <div
+          id="mobile-nav"
+          className="border-t border-[#e2e8f0] bg-white px-5 py-4 md:hidden"
+        >
+          <nav className="flex flex-col gap-1" aria-label="Mobile navigation">
+            {navLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="rounded-lg px-3 py-2.5 text-sm font-medium text-[#334155] hover:bg-[#f1f5f9] hover:text-[#1d4ed8]"
+                onClick={() => setOpen(false)}
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
+          <div className="mt-4 flex flex-col gap-2">
+            <MarketingButton
+              href={BUILDER_URL}
+              className="w-full"
+              onClick={() => setOpen(false)}
+            >
+              Start Free Trial
+            </MarketingButton>
+            <MarketingButton
+              href={BOOK_DEMO_MAILTO}
+              variant="outline"
+              className="w-full"
+              onClick={() => setOpen(false)}
+            >
+              Book Demo
+            </MarketingButton>
+          </div>
+        </div>
+      ) : null}
     </header>
   )
 }
