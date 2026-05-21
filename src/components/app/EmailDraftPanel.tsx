@@ -57,6 +57,18 @@ export function EmailDraftPanel({
         </p>
       </div>
 
+      <label className="mt-4 block">
+        <span className="mb-2 block text-sm font-semibold text-slate-300">
+          Subject
+        </span>
+        <input
+          readOnly
+          value={subject}
+          className="w-full min-h-[48px] rounded-xl border border-blue-500/25 bg-[rgba(10,15,30,0.75)] px-4 py-3 text-base text-slate-300"
+          aria-label="Email subject"
+        />
+      </label>
+
       <div className="relative mt-4">
         <textarea
           className={builderTextareaClass}

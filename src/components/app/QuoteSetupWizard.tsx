@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight, Settings2, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import {
   DEPOSIT_OPTIONS,
   DELIVERY_OPTIONS,
@@ -31,14 +31,9 @@ export function QuoteSetupWizard({
   onComplete,
 }: QuoteSetupWizardProps) {
   const [step, setStep] = useState(0)
-  const [draft, setDraft] = useState<SqbaSetupConfig>(initialConfig)
-
-  useEffect(() => {
-    if (open) {
-      setDraft(initialConfig.completed ? initialConfig : defaultSetupConfig())
-      setStep(0)
-    }
-  }, [open, initialConfig])
+  const [draft, setDraft] = useState<SqbaSetupConfig>(() =>
+    initialConfig.completed ? initialConfig : defaultSetupConfig(),
+  )
 
   if (!open) return null
 
@@ -334,7 +329,7 @@ function WizardStep({
   children,
 }: {
   title: string
-  children: React.ReactNode
+  children: ReactNode
 }) {
   return (
     <div>
@@ -344,7 +339,7 @@ function WizardStep({
   )
 }
 
-function OptionGrid({ children }: { children: React.ReactNode }) {
+function OptionGrid({ children }: { children: ReactNode }) {
   return <div className="flex flex-col gap-3">{children}</div>
 }
 
@@ -355,7 +350,7 @@ function OptionButton({
 }: {
   selected: boolean
   onClick: () => void
-  children: React.ReactNode
+  children: ReactNode
 }) {
   return (
     <button

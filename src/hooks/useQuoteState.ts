@@ -15,7 +15,6 @@ import {
   getSuggestedLineItemLabels,
   wizardBusinessToSqbaId,
   type SqbaSetupConfig,
-  type WritingToneId,
 } from '../lib/quoteos/setup-wizard'
 import {
   getBusinessLabel,
@@ -39,9 +38,7 @@ export function useQuoteState(setupConfig?: SqbaSetupConfig | null) {
   const [emailDraftOverride, setEmailDraftOverride] = useState<string | null>(
     null,
   )
-  const [writingTone, setWritingTone] = useState<WritingToneId>(
-    setupConfig?.writingTone ?? 'professional',
-  )
+  const writingTone = setupConfig?.writingTone ?? 'professional'
 
   const totals = useMemo(
     () => calculateTotals(quote.lineItems, quote.depositEnabled),
@@ -236,8 +233,7 @@ export function useQuoteState(setupConfig?: SqbaSetupConfig | null) {
     setQuote(defaultQuoteState())
     setMicahDraft('')
     setEmailDraftOverride(null)
-    setWritingTone(setupConfig?.writingTone ?? 'professional')
-  }, [setupConfig?.writingTone])
+  }, [])
 
   const setEmailDraft = useCallback((text: string) => {
     setEmailDraftOverride(text)
@@ -250,8 +246,6 @@ export function useQuoteState(setupConfig?: SqbaSetupConfig | null) {
     const depositPct = getDepositPercent(config)
     const suggestedLabels = getSuggestedLineItemLabels(config)
     const setupNote = buildMicahSetupNote(config)
-
-    setWritingTone(config.writingTone)
 
     setQuote((prev) => {
       const next: QuoteFormState = {

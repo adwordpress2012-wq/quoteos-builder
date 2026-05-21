@@ -17,6 +17,8 @@ import {
   generateQuoteHealth,
   generateSmsDraft,
 } from '../../lib/quoteos/micah'
+import type { SqbaSetupConfig } from '../../lib/quoteos/setup-wizard'
+import { getDeliveryLabel } from '../../lib/quoteos/setup-wizard'
 import { MICAH_ACTIONS, type MicahActionId } from '../../lib/quoteos/types'
 import type { QuoteFormState, QuoteTotals } from '../../lib/quoteos/types'
 import { cn } from '../../lib/utils'
@@ -34,6 +36,7 @@ type MicahAssistantPanelProps = {
   totals: QuoteTotals
   emailDraft: string
   onEmailDraftChange: (text: string) => void
+  setup?: SqbaSetupConfig | null
   onApplyPackageTier?: () => void
   className?: string
 }
@@ -42,6 +45,7 @@ export function MicahAssistantPanel({
   quote,
   emailDraft,
   onEmailDraftChange,
+  setup,
   className,
 }: MicahAssistantPanelProps) {
   const sourcePrompt =
@@ -49,10 +53,11 @@ export function MicahAssistantPanel({
   const quickQuote = generateQuickQuoteFromPrompt(
     sourcePrompt,
     quote.businessTypeId,
+    setup,
   )
   const dealStrategy = generateDealStrategy(quote)
   const quoteHealth = generateQuoteHealth(quote)
-  const followUp = generateFollowUpSuggestion(quote)
+  const followUp = generateFollowUpSuggestion(quote, setup)
   const smsDraft = generateSmsDraft(quote)
   const invoiceSuggestion = generateInvoiceSuggestion(quote)
   const memorySummary = generateCustomerMemoryPlaceholder(quote)
@@ -85,6 +90,9 @@ export function MicahAssistantPanel({
           <h2 className="text-lg font-semibold text-slate-50">Micah</h2>
           <p className="text-xs text-slate-500">
             Local SQBA MVP - review before sending
+            {setup?.completed && setup.delivery !== 'email'
+              ? ` · ${getDeliveryLabel(setup.delivery)}`
+              : ''}
           </p>
         </div>
       </div>

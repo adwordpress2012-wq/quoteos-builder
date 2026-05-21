@@ -3,13 +3,13 @@ import { cn } from '../../lib/utils'
 
 type MobileBottomBarProps = {
   onGenerate: () => void
-  onPreview: () => void
+  onReview: () => void
   onOpenMicah: () => void
 }
 
 export function MobileBottomBar({
   onGenerate,
-  onPreview,
+  onReview,
   onOpenMicah,
 }: MobileBottomBarProps) {
   return (
@@ -25,7 +25,7 @@ export function MobileBottomBar({
           onClick={onGenerate}
           primary
         />
-        <BarButton icon={Eye} label="Preview" onClick={onPreview} />
+        <BarButton icon={Eye} label="Review" onClick={onReview} />
         <BarButton icon={Sparkles} label="Micah" onClick={onOpenMicah} />
       </div>
     </div>

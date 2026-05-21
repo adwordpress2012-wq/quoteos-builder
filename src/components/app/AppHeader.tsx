@@ -20,10 +20,10 @@ export function AppHeader({ showBuilderNav = true }: AppHeaderProps) {
             </span>
             <div className="text-left leading-tight">
               <span className="block text-sm font-semibold text-slate-50 sm:text-base">
-                QuoteOS
+                QuoteOS SQBA
               </span>
               <span className="text-[10px] text-slate-500 sm:text-[11px]">
-                SQB Builder
+                Smart Quote Builder
               </span>
             </div>
           </Link>
@@ -42,7 +42,7 @@ export function AppHeader({ showBuilderNav = true }: AppHeaderProps) {
                 className="rounded-lg border border-blue-500/30 bg-blue-500/10 px-3 py-1.5 text-xs font-medium text-cyan-200"
                 aria-current="page"
               >
-                SQB Builder
+                SQBA
               </span>
             </nav>
           ) : null}
