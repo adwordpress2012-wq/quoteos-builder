@@ -13,11 +13,20 @@ export function MicahFloatingButton({ onClick, className }: MicahFloatingButtonP
       onClick={onClick}
       aria-label="Open Micah assistant"
       className={cn(
-        'fixed bottom-24 right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full border border-purple-400/50 bg-gradient-to-br from-blue-600/90 to-purple-600/90 text-white shadow-[var(--qos-glow-blue)] transition-transform hover:scale-105 active:scale-95 xl:hidden print:hidden',
+        'micah-float-btn fixed bottom-24 right-4 z-30 flex flex-col items-center gap-1 print:hidden xl:hidden',
         className,
       )}
     >
-      <Sparkles className="h-6 w-6" aria-hidden="true" />
+      <span className="relative flex h-14 w-14 items-center justify-center rounded-full border border-purple-400/50 bg-gradient-to-br from-blue-600/90 to-purple-600/90 text-white shadow-[var(--qos-glow-blue)]">
+        <span
+          className="absolute inset-0 rounded-full bg-purple-500/30 blur-md"
+          aria-hidden="true"
+        />
+        <Sparkles className="relative h-6 w-6" aria-hidden="true" />
+      </span>
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-cyan-300/90">
+        Micah
+      </span>
     </button>
   )
 }

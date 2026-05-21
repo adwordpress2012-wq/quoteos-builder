@@ -1,44 +1,32 @@
-import { Eye, Printer } from 'lucide-react'
+import { Eye, FileCheck } from 'lucide-react'
 
 type CompactProposalCardProps = {
   ready: boolean
   onView: () => void
-  onPrint: () => void
 }
 
-export function CompactProposalCard({
-  ready,
-  onView,
-  onPrint,
-}: CompactProposalCardProps) {
+export function CompactProposalCard({ ready, onView }: CompactProposalCardProps) {
   if (!ready) return null
 
   return (
-    <section className="glass-card flex flex-wrap items-center justify-between gap-4 rounded-2xl p-4 sm:p-5">
-      <div>
-        <p className="text-base font-semibold text-slate-50">Proposal ready</p>
-        <p className="mt-0.5 text-sm text-slate-500">
-          View the full PDF-style preview when you need it.
-        </p>
+    <section className="glass-card rounded-2xl p-4 sm:p-5">
+      <div className="flex items-start gap-3">
+        <span className="icon-block-blue flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+          <FileCheck className="h-5 w-5 text-cyan-200" aria-hidden="true" />
+        </span>
+        <div className="min-w-0 flex-1">
+        <p className="text-base font-semibold text-slate-50">Proposal is ready</p>
+        <p className="mt-0.5 text-sm text-slate-500">Last updated just now</p>
+        </div>
       </div>
-      <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-        <button
-          type="button"
-          onClick={onView}
-          className="inline-flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-xl border border-blue-400/40 bg-gradient-to-r from-blue-600/30 to-purple-600/25 px-4 text-sm font-semibold text-white"
-        >
-          <Eye className="h-4 w-4" aria-hidden="true" />
-          View Proposal
-        </button>
-        <button
-          type="button"
-          onClick={onPrint}
-          className="inline-flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-xl border border-blue-500/25 bg-blue-500/8 px-4 text-sm font-medium text-cyan-200"
-        >
-          <Printer className="h-4 w-4" aria-hidden="true" />
-          Print / Save PDF
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={onView}
+        className="mt-4 inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl border border-blue-400/40 bg-gradient-to-r from-blue-600/30 to-purple-600/25 px-4 text-sm font-semibold text-white"
+      >
+        <Eye className="h-4 w-4" aria-hidden="true" />
+        View Proposal
+      </button>
     </section>
   )
 }

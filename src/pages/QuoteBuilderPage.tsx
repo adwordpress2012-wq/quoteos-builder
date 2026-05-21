@@ -1,19 +1,20 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { CheckCircle2 } from 'lucide-react'
-import { generateQuickQuoteFromPrompt } from '../lib/quoteos/micah'
 import {
   getDefaultQuoteOptionId,
   type BusinessTypeId,
 } from '../lib/quoteos/sqba-config'
 import type { SqbaSetupConfig } from '../lib/quoteos/setup-wizard'
 import { AppShell } from '../components/app/AppShell'
+import { AppSidebar } from '../components/app/AppSidebar'
 import { BuilderOverlay } from '../components/app/BuilderOverlay'
+import { BuilderReminderCards } from '../components/app/BuilderReminderCards'
 import { CompactEmailCard } from '../components/app/CompactEmailCard'
 import { CompactProposalCard } from '../components/app/CompactProposalCard'
 import { EmailDraftPanel } from '../components/app/EmailDraftPanel'
 import { GeneratedQuoteCard } from '../components/app/GeneratedQuoteCard'
+import { ManualHybridSection } from '../components/app/ManualHybridSection'
 import { MicahChatPanel } from '../components/app/MicahChatPanel'
-import { MicahFloatingButton } from '../components/app/MicahFloatingButton'
 import { MobileBottomBar } from '../components/app/MobileBottomBar'
 import { ProposalPreview } from '../components/app/ProposalPreview'
 import { QuoteAdvancedEditor } from '../components/app/QuoteAdvancedEditor'
@@ -21,18 +22,10 @@ import { QuotePromptCard } from '../components/app/QuotePromptCard'
 import { QuoteSetupWizard } from '../components/app/QuoteSetupWizard'
 import { SetupSummaryCard } from '../components/app/SetupSummaryCard'
 import { SimpleClientCard } from '../components/app/SimpleClientCard'
+import { FloatingMicah } from '../components/micah/FloatingMicah'
+import { MicahChatDrawer } from '../components/micah/MicahChatDrawer'
 import { useQuoteState } from '../hooks/useQuoteState'
 import { useSetupWizard } from '../hooks/useSetupWizard'
-import { cn } from '../lib/utils'
-
-async function copyEmailDraft(text: string) {
-  try {
-    await navigator.clipboard.writeText(text)
-    window.alert('Email copied to clipboard.')
-  } catch {
-    window.prompt('Copy email:', text)
-  }
-}
 
 export function QuoteBuilderPage() {
   const {
@@ -54,11 +47,13 @@ export function QuoteBuilderPage() {
     generateSmartQuote,
     applyPackageTier,
     applySetupWizard,
+    appendPresetItems,
     setQuoteStatus,
     updateLineItem,
     addLineItem,
     removeLineItem,
     setEmailDraft,
+    resetQuote,
   } = useQuoteState(setup.completed ? setup : null)
 
   const [micahDrawerOpen, setMicahDrawerOpen] = useState(false)
@@ -66,6 +61,8 @@ export function QuoteBuilderPage() {
   const [emailOpen, setEmailOpen] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [micahResponseReady, setMicahResponseReady] = useState(false)
+  const [advancedOpen, setAdvancedOpen] = useState(false)
+  const advancedRef = useRef<HTMLDivElement>(null)
 
   const handleGenerate = useCallback(() => {
     setGenerating(true)
@@ -91,115 +88,137 @@ export function QuoteBuilderPage() {
     [completeSetup, applySetupWizard],
   )
 
-  const micahNote = quote.quoteGenerated
-    ? (() => {
-        const q = generateQuickQuoteFromPrompt(
-          quote.micahPrompt || quote.projectSummary,
-          quote.businessTypeId,
-          setup.completed ? setup : null,
-        )
-        return q.marginNote.length > 120
-          ? 'Simple package offer. Good for a budget-conscious client while keeping recurring support.'
-          : q.marginNote
-      })()
-    : undefined
+  const scrollToAdvanced = () => {
+    setAdvancedOpen(true)
+    window.setTimeout(() => {
+      advancedRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 50)
+  }
+
+  const handleCopyLink = async () => {
+    const summary = `${quote.projectTitle || 'Quote'} — ${window.location.href}`
+    try {
+      await navigator.clipboard.writeText(summary)
+      window.alert('Quote link copied to clipboard.')
+    } catch {
+      window.prompt('Copy link:', summary)
+    }
+  }
 
   return (
     <AppShell>
-      <main className="builder-main mx-auto max-w-[1400px] px-4 py-5 pb-28 sm:px-6 sm:py-6 xl:pb-8">
-        {setupSuccess && (
-          <div
-            className="mb-4 flex items-start gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3"
-            role="status"
-          >
-            <CheckCircle2
-              className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400"
-              aria-hidden="true"
-            />
-            <p className="text-sm text-emerald-100">
-              Your SQBA setup is ready. You can now generate quotes faster.
-            </p>
-          </div>
-        )}
+      <div className="flex min-h-[calc(100svh-3.5rem)] sm:min-h-[calc(100svh-4rem)]">
+        <AppSidebar onNewQuote={resetQuote} />
 
-        <div className="grid gap-6 lg:grid-cols-[1fr_340px] xl:grid-cols-[1fr_380px] xl:items-start">
-          <div className="min-w-0 space-y-4">
-            {!setup.completed ? (
-              <SetupSummaryCard
-                setup={setup}
-                onEditSetup={openWizard}
-                onResetSetup={resetSetup}
-              />
-            ) : null}
-
-            <QuotePromptCard
-              prompt={quote.micahPrompt}
-              onPromptChange={(v) => updateField('micahPrompt', v)}
-              onGenerate={handleGenerate}
-              isGenerating={generating}
-            />
-
-            <GeneratedQuoteCard
-              quote={quote}
-              totals={totals}
-              setup={setup.completed ? setup : null}
-              micahNote={micahNote}
-              onReview={() => setProposalOpen(true)}
-              onCopyEmail={() => copyEmailDraft(emailDraft)}
-              onPrint={handlePrint}
-            />
-
-            {quote.quoteGenerated ? (
-              <>
-                <SimpleClientCard quote={quote} onFieldChange={updateField} />
-                <CompactProposalCard
-                  ready={quote.quoteGenerated}
-                  onView={() => setProposalOpen(true)}
-                  onPrint={handlePrint}
+        <div className="flex min-w-0 flex-1 flex-col">
+          <main className="builder-main mx-auto w-full max-w-[1200px] flex-1 px-4 py-5 pb-28 sm:px-6 sm:py-6 xl:max-w-none xl:pb-8">
+            {setupSuccess && (
+              <div
+                className="mb-4 flex items-start gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3"
+                role="status"
+              >
+                <CheckCircle2
+                  className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400"
+                  aria-hidden="true"
                 />
-                <CompactEmailCard
+                <p className="text-sm text-emerald-100">
+                  Your SQBA setup is ready. You can now generate quotes faster.
+                </p>
+              </div>
+            )}
+
+            <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-start">
+              <div className="min-w-0 space-y-4">
+                {!setup.completed ? (
+                  <SetupSummaryCard
+                    setup={setup}
+                    onEditSetup={openWizard}
+                    onResetSetup={resetSetup}
+                  />
+                ) : null}
+
+                <QuotePromptCard
+                  prompt={quote.micahPrompt}
+                  onPromptChange={(v) => updateField('micahPrompt', v)}
+                  onGenerate={handleGenerate}
+                  isGenerating={generating}
+                />
+
+                <ManualHybridSection onAddPreset={appendPresetItems} />
+
+                <GeneratedQuoteCard
+                  quote={quote}
+                  totals={totals}
+                  setup={setup.completed ? setup : null}
+                  onReview={() => setProposalOpen(true)}
+                  onEditItems={scrollToAdvanced}
+                  onCopyLink={handleCopyLink}
+                  onSendQuote={() => setEmailOpen(true)}
+                  onStatusChange={setQuoteStatus}
+                />
+
+                {quote.quoteGenerated ? (
+                  <>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <SimpleClientCard quote={quote} onFieldChange={updateField} />
+                      <CompactProposalCard
+                        ready={quote.quoteGenerated}
+                        onView={() => setProposalOpen(true)}
+                      />
+                    </div>
+                    <CompactEmailCard
+                      quote={quote}
+                      emailDraft={emailDraft}
+                      ready={quote.quoteGenerated}
+                      onOpenComposer={() => setEmailOpen(true)}
+                    />
+                    <div ref={advancedRef}>
+                      <QuoteAdvancedEditor
+                        key={advancedOpen ? 'advanced-open' : 'advanced-closed'}
+                        quote={quote}
+                        onFieldChange={updateField}
+                        onBusinessTypeChange={handleBusinessTypeChange}
+                        onQuoteOptionChange={(optionId) =>
+                          applySqbaSelection(quote.businessTypeId, optionId)
+                        }
+                        onPackageTier={applyPackageTier}
+                        onStatusChange={setQuoteStatus}
+                        onLineItemChange={updateLineItem}
+                        onAddLineItem={addLineItem}
+                        onRemoveLineItem={removeLineItem}
+                        defaultOpen={advancedOpen}
+                      />
+                    </div>
+                    {setup.completed ? (
+                      <button
+                        type="button"
+                        onClick={openWizard}
+                        className="min-h-[44px] w-full text-sm text-slate-500 underline-offset-2 hover:text-cyan-300 hover:underline"
+                      >
+                        Edit SQBA setup
+                      </button>
+                    ) : null}
+                  </>
+                ) : null}
+              </div>
+
+              <div className="hidden xl:block xl:sticky xl:top-20 xl:self-start">
+                <MicahChatPanel
                   quote={quote}
                   emailDraft={emailDraft}
-                  ready={quote.quoteGenerated}
-                  onOpenComposer={() => setEmailOpen(true)}
+                  setup={setup.completed ? setup : null}
+                  onEmailDraftChange={setEmailDraft}
+                  showGenerateResponse={micahResponseReady}
                 />
-                <QuoteAdvancedEditor
-                  quote={quote}
-                  onFieldChange={updateField}
-                  onBusinessTypeChange={handleBusinessTypeChange}
-                  onQuoteOptionChange={(optionId) =>
-                    applySqbaSelection(quote.businessTypeId, optionId)
-                  }
-                  onPackageTier={applyPackageTier}
-                  onStatusChange={setQuoteStatus}
-                  onLineItemChange={updateLineItem}
-                  onAddLineItem={addLineItem}
-                  onRemoveLineItem={removeLineItem}
+                <BuilderReminderCards
+                  onSendFollowUp={() => setEmailOpen(true)}
+                  onViewQuote={() => setProposalOpen(true)}
                 />
-                {setup.completed ? (
-                  <button
-                    type="button"
-                    onClick={openWizard}
-                    className="min-h-[44px] w-full text-sm text-slate-500 underline-offset-2 hover:text-cyan-300 hover:underline"
-                  >
-                    Edit SQBA setup
-                  </button>
-                ) : null}
-              </>
-            ) : null}
-          </div>
-
-          <div className="hidden lg:block lg:sticky lg:top-20 lg:self-start">
-            <MicahChatPanel
-              quote={quote}
-              emailDraft={emailDraft}
-              setup={setup.completed ? setup : null}
-              onEmailDraftChange={setEmailDraft}
-              showGenerateResponse={micahResponseReady}
-            />
-          </div>
+              </div>
+            </div>
+          </main>
         </div>
-      </main>
+      </div>
 
       <div className="hidden print:block">
         <ProposalPreview
@@ -216,6 +235,15 @@ export function QuoteBuilderPage() {
         className="max-w-3xl"
       >
         <ProposalPreview quote={quote} totals={totals} />
+        <div className="mt-4 flex gap-2 print:hidden">
+          <button
+            type="button"
+            onClick={handlePrint}
+            className="min-h-[44px] rounded-xl border border-blue-500/30 px-4 text-sm font-medium text-cyan-200"
+          >
+            Print / Save PDF
+          </button>
+        </div>
       </BuilderOverlay>
 
       <BuilderOverlay
@@ -243,50 +271,27 @@ export function QuoteBuilderPage() {
       <MobileBottomBar
         onGenerate={handleGenerate}
         onReview={() =>
-          quote.quoteGenerated
-            ? setProposalOpen(true)
-            : handleGenerate()
+          quote.quoteGenerated ? setProposalOpen(true) : handleGenerate()
         }
         onOpenMicah={() => setMicahDrawerOpen(true)}
       />
 
-      <MicahFloatingButton onClick={() => setMicahDrawerOpen(true)} />
+      <FloatingMicah
+        quote={quote}
+        setup={setup.completed ? setup : null}
+        isThinking={generating}
+        onClick={() => setMicahDrawerOpen(true)}
+      />
 
-      <div
-        className={cn(
-          'fixed inset-0 z-50 lg:hidden print:hidden',
-          micahDrawerOpen ? 'pointer-events-auto' : 'pointer-events-none',
-        )}
-        aria-hidden={!micahDrawerOpen}
-      >
-        <button
-          type="button"
-          className={cn(
-            'absolute inset-0 bg-black/60 transition-opacity',
-            micahDrawerOpen ? 'opacity-100' : 'opacity-0',
-          )}
-          aria-label="Close Micah"
-          onClick={() => setMicahDrawerOpen(false)}
-        />
-        <div
-          className={cn(
-            'absolute inset-x-0 bottom-0 flex max-h-[88vh] flex-col transition-transform duration-300',
-            micahDrawerOpen ? 'translate-y-0' : 'translate-y-full',
-          )}
-        >
-          <div className="mx-auto mb-2 h-1 w-12 rounded-full bg-slate-600" />
-          <div className="overflow-hidden rounded-t-2xl border-t border-blue-500/30 bg-[var(--qos-bg)] px-2 pb-4 pt-2">
-            <MicahChatPanel
-              quote={quote}
-              emailDraft={emailDraft}
-              setup={setup.completed ? setup : null}
-              onEmailDraftChange={setEmailDraft}
-              showGenerateResponse={micahResponseReady}
-              className="max-h-[80vh] border-0 shadow-none"
-            />
-          </div>
-        </div>
-      </div>
+      <MicahChatDrawer
+        open={micahDrawerOpen}
+        onClose={() => setMicahDrawerOpen(false)}
+        quote={quote}
+        emailDraft={emailDraft}
+        setup={setup.completed ? setup : null}
+        isThinking={generating}
+        onEmailDraftChange={setEmailDraft}
+      />
     </AppShell>
   )
 }

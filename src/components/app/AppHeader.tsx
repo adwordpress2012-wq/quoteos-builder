@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { ExternalLink } from 'lucide-react'
 import { cn } from '../../lib/utils'
 
@@ -7,18 +7,23 @@ type AppHeaderProps = {
 }
 
 export function AppHeader({ showBuilderNav = true }: AppHeaderProps) {
+  const location = useLocation()
+  const onBuilder = location.pathname.startsWith('/app/builder')
+  const onDashboard =
+    location.pathname === '/app' || location.pathname === '/app/dashboard'
+
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--qos-border)] bg-[var(--qos-bg)]/90 shadow-[inset_0_-1px_0_rgba(59,130,246,0.08)] backdrop-blur-xl print:hidden">
       <div className="mx-auto flex h-14 max-w-[1600px] flex-wrap items-center justify-between gap-3 px-4 sm:h-16 sm:px-6">
-        <div className="flex items-center gap-4">
+        <div className="flex min-w-0 items-center gap-3 sm:gap-4">
           <Link
             to="/app/builder"
-            className="group flex items-center gap-2.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-400"
+            className="group flex shrink-0 items-center gap-2.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-400"
           >
             <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-blue-500/40 bg-gradient-to-br from-blue-600/30 to-purple-500/20 text-sm font-bold text-cyan-200 shadow-[var(--qos-glow-blue)]">
               Q
             </span>
-            <div className="text-left leading-tight">
+            <div className="hidden text-left leading-tight sm:block">
               <span className="block text-sm font-semibold text-slate-50 sm:text-base">
                 QuoteOS SQBA
               </span>
@@ -27,26 +32,39 @@ export function AppHeader({ showBuilderNav = true }: AppHeaderProps) {
               </span>
             </div>
           </Link>
-          {showBuilderNav ? (
-            <nav
-              className="hidden items-center gap-1 sm:flex"
-              aria-label="App navigation"
-            >
-              <Link
-                to="/app"
-                className="rounded-lg px-3 py-1.5 text-xs text-slate-400 transition-colors hover:bg-white/[0.04] hover:text-cyan-200"
-              >
-                Dashboard
-              </Link>
-              <span
-                className="rounded-lg border border-blue-500/30 bg-blue-500/10 px-3 py-1.5 text-xs font-medium text-cyan-200"
-                aria-current="page"
-              >
-                SQBA
-              </span>
-            </nav>
-          ) : null}
         </div>
+
+        {showBuilderNav ? (
+          <nav
+            className="order-3 flex w-full justify-center gap-1 sm:order-none sm:w-auto"
+            aria-label="App navigation"
+          >
+            <Link
+              to="/app/builder"
+              className={cn(
+                'rounded-full px-4 py-1.5 text-xs font-medium transition-colors sm:text-sm',
+                onBuilder
+                  ? 'border border-blue-500/40 bg-blue-500/15 text-cyan-200 shadow-[var(--qos-glow-blue)]'
+                  : 'text-slate-400 hover:bg-white/[0.04] hover:text-cyan-200',
+              )}
+              aria-current={onBuilder ? 'page' : undefined}
+            >
+              SQBA
+            </Link>
+            <Link
+              to="/app"
+              className={cn(
+                'rounded-full px-4 py-1.5 text-xs font-medium transition-colors sm:text-sm',
+                onDashboard
+                  ? 'border border-blue-500/40 bg-blue-500/15 text-cyan-200'
+                  : 'text-slate-400 hover:bg-white/[0.04] hover:text-cyan-200',
+              )}
+              aria-current={onDashboard ? 'page' : undefined}
+            >
+              Dashboard
+            </Link>
+          </nav>
+        ) : null}
 
         <div className="flex items-center gap-2 sm:gap-3">
           <Link

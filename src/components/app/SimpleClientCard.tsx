@@ -19,10 +19,6 @@ export function SimpleClientCard({ quote, onFieldChange }: SimpleClientCardProps
   const [editOpen, setEditOpen] = useState(false)
   const panelId = useId()
 
-  const contactLine = [quote.contactName, quote.phone, quote.email]
-    .filter(Boolean)
-    .join(' · ')
-
   return (
     <section className="glass-card rounded-2xl p-4 sm:p-5">
       <div className="flex items-start justify-between gap-3">
@@ -33,11 +29,20 @@ export function SimpleClientCard({ quote, onFieldChange }: SimpleClientCardProps
           <p className="mt-1 truncate text-base font-semibold text-slate-100">
             {quote.clientBusinessName.trim() || 'Business name'}
           </p>
-          {contactLine ? (
-            <p className="mt-1 text-sm text-slate-400">{contactLine}</p>
-          ) : (
+          {quote.contactName.trim() ? (
+            <p className="mt-1 text-sm text-slate-300">{quote.contactName}</p>
+          ) : null}
+          {quote.phone.trim() ? (
+            <p className="text-sm text-slate-400">{quote.phone}</p>
+          ) : null}
+          {quote.email.trim() ? (
+            <p className="text-sm text-slate-400">{quote.email}</p>
+          ) : null}
+          {!quote.contactName.trim() &&
+          !quote.phone.trim() &&
+          !quote.email.trim() ? (
             <p className="mt-1 text-sm text-slate-500">Add contact details</p>
-          )}
+          ) : null}
         </div>
         <button
           type="button"
@@ -46,7 +51,7 @@ export function SimpleClientCard({ quote, onFieldChange }: SimpleClientCardProps
           aria-controls={panelId}
           onClick={() => setEditOpen((v) => !v)}
         >
-          Edit details
+          Edit
         </button>
       </div>
 

@@ -1,4 +1,3 @@
-import { Wand2 } from 'lucide-react'
 import { builderPrimaryBtnClass, builderTextareaClass } from './builder-styles'
 
 type QuotePromptCardProps = {
@@ -20,7 +19,7 @@ export function QuotePromptCard({
         What are we quoting today?
       </h2>
       <p className="mt-1 text-sm text-slate-500">
-        Tell Micah in plain English — he will package the offer for you.
+        Tell Micah in plain English — he will build the quote for you.
       </p>
 
       <label className="mt-5 block" htmlFor="micah-prompt">
@@ -29,7 +28,7 @@ export function QuotePromptCard({
           id="micah-prompt"
           rows={4}
           className={builderTextareaClass}
-          placeholder="Example: one-page plumbing website with SCW and Google setup"
+          placeholder="One-page plumbing website with Google setup and email setup"
           value={prompt}
           onChange={(e) => onPromptChange(e.target.value)}
         />
@@ -41,7 +40,7 @@ export function QuotePromptCard({
         onClick={onGenerate}
         disabled={isGenerating || !prompt.trim()}
       >
-        <Wand2 className="h-5 w-5" aria-hidden="true" />
+        <span aria-hidden="true">✨</span>
         {isGenerating ? 'Micah is building…' : 'Ask Micah to Build Quote'}
       </button>
     </section>

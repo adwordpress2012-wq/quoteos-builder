@@ -236,3 +236,49 @@ export function applyPresetToLineItems(preset: PricingPreset) {
 export function getPresetOptionsForSidebar() {
   return PRICING_PRESETS.map((p) => ({ id: p.id, label: p.label }))
 }
+
+const WEBSITE_PACKAGE_IDS = new Set<QuoteTypeId>([
+  'dos-website-rebuild',
+  'new-website-build',
+])
+
+const ADDON_SERVICE_IDS = new Set<QuoteTypeId>([
+  'micah-sba',
+  'smart-chat-widget',
+  'agentmate-setup',
+  'google-business-setup',
+  'email-setup',
+  'dos-ai-automation',
+])
+
+const SUPPORT_HOSTING_IDS = new Set<QuoteTypeId>(['hosting-support'])
+
+export type PricingCatalogGroup = {
+  id: 'website' | 'addon' | 'support'
+  label: string
+  options: { id: QuoteTypeId; label: string }[]
+}
+
+export function getPricingCatalogGroups(): PricingCatalogGroup[] {
+  const website = PRICING_PRESETS.filter((p) => WEBSITE_PACKAGE_IDS.has(p.id))
+  const addons = PRICING_PRESETS.filter((p) => ADDON_SERVICE_IDS.has(p.id))
+  const support = PRICING_PRESETS.filter((p) => SUPPORT_HOSTING_IDS.has(p.id))
+
+  return [
+    {
+      id: 'website',
+      label: 'DOS Website Packages',
+      options: website.map((p) => ({ id: p.id, label: p.label })),
+    },
+    {
+      id: 'addon',
+      label: 'Add-on Services',
+      options: addons.map((p) => ({ id: p.id, label: p.label })),
+    },
+    {
+      id: 'support',
+      label: 'Support & Hosting',
+      options: support.map((p) => ({ id: p.id, label: p.label })),
+    },
+  ]
+}

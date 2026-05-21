@@ -119,6 +119,31 @@ export function useQuoteState(setupConfig?: SqbaSetupConfig | null) {
     applyQuoteType(presetId)
   }, [applyQuoteType])
 
+  const appendPresetItems = useCallback((presetId: QuoteTypeId) => {
+    const preset = getPresetByQuoteType(presetId)
+    if (!preset) return
+
+    setQuote((prev) => {
+      const added = applyPresetToLineItems(preset)
+      const inclusions = [
+        ...new Set([...prev.inclusions, ...preset.inclusions]),
+      ]
+      return {
+        ...prev,
+        quoteTypeId: presetId,
+        quoteGenerated: true,
+        lineItems: [...prev.lineItems, ...added],
+        inclusions,
+        projectSummary:
+          prev.projectSummary.trim() ||
+          preset.suggestedSummary ||
+          prev.projectSummary,
+        paymentTerms: preset.suggestedPaymentTerms ?? prev.paymentTerms,
+      }
+    })
+    setEmailDraftOverride(null)
+  }, [])
+
   const generateSmartQuote = useCallback(() => {
     const parsed = parseMicahPrompt(quote.micahPrompt)
     const option = getQuoteOption(parsed.businessTypeId, parsed.quoteOptionId)
@@ -313,6 +338,7 @@ export function useQuoteState(setupConfig?: SqbaSetupConfig | null) {
     applyQuoteType,
     applySqbaSelection,
     applyPreset,
+    appendPresetItems,
     generateSmartQuote,
     applyPackageTier,
     setQuoteStatus,

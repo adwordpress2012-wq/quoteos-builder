@@ -48,7 +48,7 @@ export function CompactEmailCard({
         onClick={onOpenComposer}
         className="mt-4 min-h-[48px] w-full rounded-xl border border-blue-500/25 bg-blue-500/8 text-sm font-semibold text-cyan-200"
       >
-        Open Composer
+        ✨ Open Composer
       </button>
     </section>
   )
