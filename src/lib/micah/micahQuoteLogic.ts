@@ -8,6 +8,7 @@ import {
   generateSmsDraft,
 } from '../quoteos/micah'
 import { calculateTotals, formatAud } from '../quoteos/calculations'
+import { validateQuotePricing } from '../quoteos/pricing'
 import { getPackageDisplayName } from '../quoteos/quote-display'
 import type { SqbaSetupConfig } from '../quoteos/setup-wizard'
 import type { MicahActionId, QuoteFormState } from '../quoteos/types'
@@ -158,17 +159,18 @@ export function buildMicahAssistantSnapshot(
   const smsDraft = generateSmsDraft(quote)
   const invoiceSuggestion = generateInvoiceSuggestion(quote)
   const totals = calculateTotals(quote.lineItems, quote.depositEnabled)
+  const validation = validateQuotePricing(quote)
 
   return {
     packageName,
     userPrompt,
     packagingSuggestion: `I would package this as ${packageName || quickQuote.packageName}. ${quickQuote.dealNote}`,
     dealStrategy: dealStrategy.packageRecommendation,
-    marginNote: quoteHealth.marginNote,
+    marginNote: `${validation.statusLabel}. ${quoteHealth.marginNote}`,
     followUpSuggestion: followUp.recommendation,
     smsDraft: withReviewNotice(smsDraft.text),
     invoiceSuggestion: withReviewNotice(invoiceSuggestion.suggestion),
-    quoteExplanation: `This quote is currently ${quote.quoteStatus}. One-off total is ${formatAud(
+    quoteExplanation: `${validation.statusLabel}. This quote is currently ${quote.quoteStatus}. One-off total is ${formatAud(
       totals.oneOffTotal,
     )}, with ${formatAud(totals.monthlyRecurringTotal)} monthly recurring. ${dealStrategy.ctaRecommendation}`,
     reminders: getMicahReminders(quote),

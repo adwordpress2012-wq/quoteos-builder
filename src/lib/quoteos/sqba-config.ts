@@ -24,7 +24,7 @@ export const QUOTE_TYPES_BY_BUSINESS: Record<BusinessTypeId, SqbaQuoteOption[]> 
     {
       id: 'plumber-website-scw',
       label: 'Website + SCW Package',
-      presetId: 'smart-chat-widget',
+      presetId: 'dos-website-growth',
       summaryHint: 'One-page plumbing website with Smart Chat Widget (SCW).',
     },
     {
@@ -154,7 +154,7 @@ export const QUOTE_TYPES_BY_BUSINESS: Record<BusinessTypeId, SqbaQuoteOption[]> 
     {
       id: 'agency-website',
       label: 'Website Build',
-      presetId: 'new-website-build',
+      presetId: 'dos-website-growth',
     },
     {
       id: 'agency-custom',
@@ -163,6 +163,10 @@ export const QUOTE_TYPES_BY_BUSINESS: Record<BusinessTypeId, SqbaQuoteOption[]> 
     },
   ],
   'dos-client': [
+    { id: 'dos-website-starter', label: 'Website Starter', presetId: 'dos-website-starter' },
+    { id: 'dos-website-growth', label: 'Website Growth', presetId: 'dos-website-growth' },
+    { id: 'dos-website-premium', label: 'Website Premium', presetId: 'dos-website-premium' },
+    { id: 'dos-website-custom', label: 'Custom Website', presetId: 'dos-website-custom' },
     { id: 'dos-rebuild', label: 'Website Rebuild', presetId: 'dos-website-rebuild' },
     { id: 'dos-new-site', label: 'New Website Build', presetId: 'new-website-build' },
     { id: 'dos-micah-sba', label: 'Micah SBA', presetId: 'micah-sba' },

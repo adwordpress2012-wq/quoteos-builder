@@ -2,6 +2,7 @@ import { formatAud } from './calculations'
 import {
   generateQuickQuoteFromPrompt,
 } from './micah'
+import { getPackagePriceById } from './pricing'
 import { PACKAGE_TIERS, getBusinessLabel } from './sqba-config'
 import type { SqbaSetupConfig } from './setup-wizard'
 import type { QuoteFormState, QuoteTotals } from './types'
@@ -10,6 +11,11 @@ export function getPackageDisplayName(
   quote: QuoteFormState,
   setup?: SqbaSetupConfig | null,
 ): string {
+  const packagePrice = getPackagePriceById(quote.quoteTypeId)
+  if (packagePrice?.label && quote.quoteTypeId !== 'custom') {
+    return packagePrice.label
+  }
+
   if (quote.projectTitle.trim()) return quote.projectTitle.trim()
 
   const tier = quote.packageTier

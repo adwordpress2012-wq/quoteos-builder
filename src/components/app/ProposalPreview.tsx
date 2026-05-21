@@ -96,17 +96,17 @@ export function ProposalPreview({ quote, totals, id }: ProposalPreviewProps) {
 
       <section className="mt-8 rounded-xl border border-cyan-500/20 bg-cyan-500/[0.06] p-4">
         <dl className="space-y-2 text-sm">
-          <TotalRow label="Subtotal" value={formatAud(totals.subtotal)} />
-          <TotalRow label="One-off total" value={formatAud(totals.oneOffTotal)} highlight />
+          <TotalRow label="Total" value={formatAud(totals.subtotal)} />
+          <TotalRow label="Today / setup" value={formatAud(totals.oneOffTotal)} highlight />
           {totals.monthlyRecurringTotal > 0 ? (
             <TotalRow
-              label="Monthly recurring"
+              label="Ongoing"
               value={`${formatAud(totals.monthlyRecurringTotal)}/mo`}
             />
           ) : null}
           {totals.yearlyRecurringTotal > 0 ? (
             <TotalRow
-              label="Yearly recurring"
+              label="Ongoing"
               value={`${formatAud(totals.yearlyRecurringTotal)}/yr`}
             />
           ) : null}
@@ -117,7 +117,7 @@ export function ProposalPreview({ quote, totals, id }: ProposalPreviewProps) {
                 value={formatAud(totals.depositAmount)}
               />
               <TotalRow
-                label="Remaining balance"
+                label="Balance"
                 value={formatAud(totals.remainingBalance)}
               />
             </>

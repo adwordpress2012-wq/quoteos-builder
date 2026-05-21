@@ -14,15 +14,15 @@ export function QuotePromptCard({
   isGenerating,
 }: QuotePromptCardProps) {
   return (
-    <section className="glass-card rounded-2xl p-5 sm:p-6">
-      <h2 className="text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">
+    <section className="glass-card rounded-xl p-4 sm:p-5">
+      <h2 className="text-lg font-semibold tracking-tight text-slate-50 sm:text-xl">
         What are we quoting today?
       </h2>
       <p className="mt-1 text-sm text-slate-500">
         Tell Micah in plain English — he will build the quote for you.
       </p>
 
-      <label className="mt-5 block" htmlFor="micah-prompt">
+      <label className="mt-4 block" htmlFor="micah-prompt">
         <span className="sr-only">Quote prompt for Micah</span>
         <textarea
           id="micah-prompt"

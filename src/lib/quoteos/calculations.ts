@@ -1,4 +1,5 @@
 import type { LineItem, QuoteFormState, QuoteTotals } from './types'
+import { QUOTE_TYPE_OPTIONS } from './types'
 
 export function calculateTotals(
   lineItems: LineItem[],
@@ -45,6 +46,8 @@ export function formatAud(amount: number): string {
 
 export function getQuoteDisplayTitle(state: QuoteFormState): string {
   if (state.projectTitle.trim()) return state.projectTitle.trim()
+  const option = QUOTE_TYPE_OPTIONS.find((item) => item.id === state.quoteTypeId)
+  if (option) return option.label
   const type = state.quoteTypeId
   if (type === 'custom') return 'Custom Quote'
   return type

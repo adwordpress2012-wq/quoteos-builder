@@ -1,5 +1,6 @@
 import { calculateTotals, formatAud } from './calculations'
 import { buildMemorySummary, parseMicahPrompt } from './generateQuote'
+import { getPackagePriceById, validateQuotePricing } from './pricing'
 import type { SqbaSetupConfig } from './setup-wizard'
 import { getFollowUpDays } from './setup-wizard'
 import { getBusinessLabel } from './sqba-config'
@@ -128,6 +129,103 @@ function getCustomerName(quote: QuoteFormState): string {
     normalise(quote.clientBusinessName) ||
     'there'
   )
+}
+
+function getSelectedPackageName(quote: QuoteFormState): string {
+  const price = getPackagePriceById(quote.quoteTypeId)
+  if (price?.label) return price.label
+  if (quote.projectTitle.trim()) return normalise(quote.projectTitle)
+  return inferPackageName(
+    quote.projectSummary || quote.micahPrompt,
+    quote.businessTypeId,
+  )
+}
+
+function formatCurrentPrice(quote: QuoteFormState): string {
+  const totals = calculateTotals(quote.lineItems, quote.depositEnabled)
+  const parts: string[] = []
+
+  if (totals.oneOffTotal > 0) {
+    parts.push(`${formatAud(totals.oneOffTotal)} setup`)
+  }
+  if (totals.monthlyRecurringTotal > 0) {
+    parts.push(`${formatAud(totals.monthlyRecurringTotal)}/month support`)
+  }
+  if (totals.yearlyRecurringTotal > 0) {
+    parts.push(`${formatAud(totals.yearlyRecurringTotal)}/year support`)
+  }
+
+  return parts.join(' plus ') || 'Pricing missing — please set price'
+}
+
+function getQuoteInclusionText(quote: QuoteFormState): string {
+  const inclusions = quote.inclusions.length
+    ? quote.inclusions
+    : quote.lineItems.map((item) => item.label).filter(Boolean)
+
+  return inclusions.slice(0, 4).join(', ') || 'the selected scope'
+}
+
+function getSimplePackageName(quote: QuoteFormState): string {
+  const text = `${quote.projectTitle} ${quote.projectSummary} ${quote.micahPrompt}`.toLowerCase()
+  if (/booking|calendar|schedule/.test(text)) return 'Smart Booking Package'
+  if (/lead|form|google|capture/.test(text)) return 'Lead Capture Package'
+  if (/support|hosting|maintenance/.test(text)) return 'Support Package'
+  if (/website|one-page|site/.test(text)) return 'Website Growth Package'
+  if (quote.businessTypeId === 'plumber') return 'Plumbing Starter Growth Package'
+  return `${getBusinessLabel(quote.businessTypeId)} Starter Growth Package`
+}
+
+export function answerMicahQuestion(
+  question: string,
+  quote: QuoteFormState,
+): string {
+  const lower = question.toLowerCase()
+  const packageName = getSelectedPackageName(quote)
+  const customer = getCustomerName(quote)
+  const price = formatCurrentPrice(quote)
+  const validation = validateQuotePricing(quote)
+  const inclusions = getQuoteInclusionText(quote)
+  const status = quote.quoteStatus.replace('-', ' ')
+  const packageLabel = getSimplePackageName(quote)
+
+  if (/how much|price|cost|charge|one-page|one page|google|email/.test(lower)) {
+    return `${packageName} is currently ${price}. It includes ${inclusions}. This is packaged as a ${packageLabel} so it is easier for ${customer} to approve.`
+  }
+
+  if (/cheaper|discount|reduce|budget|profitable|margin/.test(lower)) {
+    return `To make this cheaper but still profitable, keep ${inclusions} in the main package and move lower-urgency extras or extra support into an optional add-on. Keep the core offer at ${price} unless you deliberately reduce scope.`
+  }
+
+  if (/what should i charge|charge .*|send .*|send to|luke/.test(lower)) {
+    return `Send ${customer} the packaged offer, not every small task itemised. I would present ${packageName} at ${price}, explain that it includes ${inclusions}, and ask them to reply approved so you can confirm timing and deposit.`
+  }
+
+  if (/support|ongoing|maintenance|hosting|add support/.test(lower)) {
+    return quote.lineItems.some((item) => item.billingType !== 'one-off')
+      ? `Support is already included: ${price}. Keep it labelled as Ongoing support so the customer understands it is aftercare, not admin fluff.`
+      : `Yes. Add a simple Ongoing support line, usually monthly or yearly. For this quote, keep the main ${packageLabel} clean and show support as an optional add-on.`
+  }
+
+  if (/follow.?up|chase|remind/.test(lower)) {
+    return `Prepare a friendly follow-up for ${customer}: "Just checking in on ${packageName}. Happy to answer questions or adjust the scope if needed." The quote is currently ${status}, so review before sending.`
+  }
+
+  if (/invoice/.test(lower)) {
+    return quote.quoteStatus === 'accepted'
+      ? `This quote is accepted, so you can create an invoice from ${packageName} for ${price}. Include deposit and balance if the customer has not already paid.`
+      : `Create the invoice after the quote is accepted. Right now it is ${status}; send or follow up on ${packageName} first, then invoice from the approved price.`
+  }
+
+  if (/casual|friendly|less formal/.test(lower)) {
+    return `Casual version: "Hey ${customer}, I have put together ${packageName}. It comes to ${price} and keeps the offer simple: ${inclusions}. If it looks good, reply approved and we will lock in the next step."`
+  }
+
+  if (!validation.canSend) {
+    return `Price missing — please set price before sending. Once pricing is set, package this as ${packageLabel} so the customer sees one clear offer.`
+  }
+
+  return `${packageName} is ${price}. It is packaged as a ${packageLabel} with ${inclusions}. This is easier for the customer to approve than a long list of small tasks.`
 }
 
 function inferPackageName(prompt: string, businessType: BusinessTypeId): string {
@@ -322,8 +420,13 @@ export function generateDealStrategy(
 
 export function generateQuoteHealth(quote: QuoteFormState): MicahQuoteHealthResult {
   const totals = calculateTotals(quote.lineItems, quote.depositEnabled)
+  const pricingValidation = validateQuotePricing(quote)
   const warnings: string[] = []
   const smartTips: string[] = []
+
+  if (!pricingValidation.canSend) {
+    warnings.push('Price missing')
+  }
 
   if (totals.oneOffTotal > 0 && totals.oneOffTotal < 500) {
     warnings.push('Quote may be too low for callout, admin time and margin.')

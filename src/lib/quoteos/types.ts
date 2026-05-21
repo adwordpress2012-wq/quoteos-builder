@@ -19,6 +19,10 @@ export type QuoteStatus =
 export type PackageTierId = 'starter' | 'growth' | 'premium'
 
 export type QuoteTypeId =
+  | 'dos-website-starter'
+  | 'dos-website-growth'
+  | 'dos-website-premium'
+  | 'dos-website-custom'
   | 'dos-website-rebuild'
   | 'new-website-build'
   | 'micah-sba'
@@ -41,6 +45,10 @@ export type QuoteTypeOption = {
 }
 
 export const QUOTE_TYPE_OPTIONS: QuoteTypeOption[] = [
+  { id: 'dos-website-starter', label: 'Website Starter Package' },
+  { id: 'dos-website-growth', label: 'Website Growth Package' },
+  { id: 'dos-website-premium', label: 'Website Premium Package' },
+  { id: 'dos-website-custom', label: 'Custom Website Package' },
   { id: 'dos-website-rebuild', label: 'DOS Website Rebuild' },
   { id: 'new-website-build', label: 'New Website Build' },
   { id: 'micah-sba', label: 'Micah SBA' },

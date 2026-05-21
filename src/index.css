@@ -212,7 +212,8 @@
 
   @media (min-width: 1280px) {
     .builder-main {
-      padding-bottom: 2rem;
+      padding-bottom: 3rem;
+      padding-right: max(1rem, env(safe-area-inset-right, 0px));
     }
   }
 
@@ -244,6 +245,18 @@
     background: #22d3ee;
     box-shadow: 0 0 12px rgba(34, 211, 238, 0.95);
     animation: micah-blink 5.2s infinite;
+  }
+
+  .micah-body-bob {
+    animation: micah-bob 3.8s ease-in-out infinite;
+  }
+
+  .micah-body-eye {
+    animation: micah-blink 5.2s infinite;
+  }
+
+  .micah-body-glow {
+    animation: micah-body-pulse 3.2s ease-in-out infinite;
   }
 
   .micah-typing-dots {
@@ -314,6 +327,28 @@
   }
 }
 
+@keyframes micah-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes micah-body-pulse {
+  0%,
+  100% {
+    opacity: 0.7;
+    transform: scale(0.97);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+}
+
 @keyframes micah-dot {
   0%,
   80%,
@@ -332,6 +367,9 @@
   .micah-float-shell,
   .micah-aura,
   .micah-eye,
+  .micah-body-bob,
+  .micah-body-eye,
+  .micah-body-glow,
   .micah-typing-dots span {
     animation: none;
     transform: none;

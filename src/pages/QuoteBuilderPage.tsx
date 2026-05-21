@@ -23,6 +23,7 @@ import { QuoteSetupWizard } from '../components/app/QuoteSetupWizard'
 import { SetupSummaryCard } from '../components/app/SetupSummaryCard'
 import { SimpleClientCard } from '../components/app/SimpleClientCard'
 import { FloatingMicah } from '../components/micah/FloatingMicah'
+import { MicahBodyMascot } from '../components/micah/MicahBodyMascot'
 import { MicahChatDrawer } from '../components/micah/MicahChatDrawer'
 import { useQuoteState } from '../hooks/useQuoteState'
 import { useSetupWizard } from '../hooks/useSetupWizard'
@@ -47,7 +48,7 @@ export function QuoteBuilderPage() {
     generateSmartQuote,
     applyPackageTier,
     applySetupWizard,
-    appendPresetItems,
+    applyPreset,
     setQuoteStatus,
     updateLineItem,
     addLineItem,
@@ -111,7 +112,7 @@ export function QuoteBuilderPage() {
         <AppSidebar onNewQuote={resetQuote} />
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <main className="builder-main mx-auto w-full max-w-[1200px] flex-1 px-4 py-5 pb-28 sm:px-6 sm:py-6 xl:max-w-none xl:pb-8">
+          <main className="builder-main mx-auto w-full max-w-[1200px] flex-1 overflow-x-clip px-4 py-4 pb-28 sm:px-6 sm:py-5 xl:max-w-none xl:pb-12 xl:pr-4">
             {setupSuccess && (
               <div
                 className="mb-4 flex items-start gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3"
@@ -127,8 +128,8 @@ export function QuoteBuilderPage() {
               </div>
             )}
 
-            <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-start">
-              <div className="min-w-0 space-y-4">
+            <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(260px,288px)] xl:items-start xl:gap-5">
+              <div className="min-w-0 space-y-3">
                 {!setup.completed ? (
                   <SetupSummaryCard
                     setup={setup}
@@ -144,7 +145,7 @@ export function QuoteBuilderPage() {
                   isGenerating={generating}
                 />
 
-                <ManualHybridSection onAddPreset={appendPresetItems} />
+                <ManualHybridSection onSelectPreset={applyPreset} />
 
                 <GeneratedQuoteCard
                   quote={quote}
@@ -202,7 +203,7 @@ export function QuoteBuilderPage() {
                 ) : null}
               </div>
 
-              <div className="hidden xl:block xl:sticky xl:top-20 xl:self-start">
+              <div className="hidden min-w-0 xl:flex xl:flex-col xl:gap-3 xl:sticky xl:top-20 xl:self-start xl:pb-36">
                 <MicahChatPanel
                   quote={quote}
                   emailDraft={emailDraft}
@@ -214,6 +215,17 @@ export function QuoteBuilderPage() {
                   onSendFollowUp={() => setEmailOpen(true)}
                   onViewQuote={() => setProposalOpen(true)}
                 />
+                <div
+                  className="flex justify-end pt-1"
+                  aria-hidden="true"
+                >
+                  <div
+                    className="micah-body-bob opacity-90"
+                    style={{ filter: 'drop-shadow(0 0 18px rgba(59,130,246,0.4))' }}
+                  >
+                    <MicahBodyMascot isThinking={generating} size="md" />
+                  </div>
+                </div>
               </div>
             </div>
           </main>
@@ -280,6 +292,8 @@ export function QuoteBuilderPage() {
         quote={quote}
         setup={setup.completed ? setup : null}
         isThinking={generating}
+        welcomeFollowUpCount={3}
+        operatorName="Luke"
         onClick={() => setMicahDrawerOpen(true)}
       />
 

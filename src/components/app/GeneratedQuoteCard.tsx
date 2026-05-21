@@ -10,9 +10,11 @@ import {
 } from 'lucide-react'
 import { formatAud } from '../../lib/quoteos/calculations'
 import {
-  formatQuoteAmountLine,
+  getPackagePriceById,
+  validateQuotePricing,
+} from '../../lib/quoteos/pricing'
+import {
   getPackageDisplayName,
-  getRecurringAmountLine,
 } from '../../lib/quoteos/quote-display'
 import type { SqbaSetupConfig } from '../../lib/quoteos/setup-wizard'
 import type { QuoteFormState, QuoteStatus, QuoteTotals } from '../../lib/quoteos/types'
@@ -51,20 +53,20 @@ export function GeneratedQuoteCard({
   if (!quote.quoteGenerated) return null
 
   const packageName = getPackageDisplayName(quote, setup)
-  const setupLine =
-    totals.oneOffTotal > 0
-      ? `${formatAud(totals.oneOffTotal)} One-off setup`
-      : null
-  const recurring = getRecurringAmountLine(totals)
-  const recurringLine = recurring
-    ? recurring.includes('/month')
-      ? `${recurring.replace('/month', '')}/month Recurring support`
-      : `${recurring} support`
-    : null
+  const packagePrice = getPackagePriceById(quote.quoteTypeId)
+  const validation = validateQuotePricing(quote)
+  const hasValidTotals = [
+    totals.oneOffTotal,
+    totals.monthlyRecurringTotal,
+    totals.yearlyRecurringTotal,
+    totals.depositAmount,
+    totals.remainingBalance,
+  ].every(Number.isFinite)
   const summary =
     quote.projectSummary.trim() ||
     quote.inclusions.slice(0, 1).join('') ||
-    formatQuoteAmountLine(totals)
+    packagePrice?.suggestedSummary ||
+    'Pricing missing — please set price'
 
   return (
     <section className="glass-card rounded-2xl p-5 shadow-[var(--qos-glow-blue)] sm:p-6">
@@ -86,11 +88,10 @@ export function GeneratedQuoteCard({
         </div>
 
         <div className="flex shrink-0 flex-col items-end gap-2 text-right">
-          {setupLine ? (
-            <p className="text-base font-bold text-slate-50">{setupLine}</p>
-          ) : null}
-          {recurringLine ? (
-            <p className="text-sm font-medium text-purple-200">{recurringLine}</p>
+          {!validation.canSend ? (
+            <p className="rounded-full border border-amber-500/35 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-100">
+              Pricing missing — please set price
+            </p>
           ) : null}
           <label className="sr-only" htmlFor="quote-status-select">
             Quote status
@@ -108,6 +109,31 @@ export function GeneratedQuoteCard({
             ))}
           </select>
         </div>
+      </div>
+
+      <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        <PricePill
+          label="Today / setup"
+          value={
+            hasValidTotals && totals.oneOffTotal > 0
+              ? formatAud(totals.oneOffTotal)
+              : 'Pricing missing — please set price'
+          }
+          strong={totals.oneOffTotal > 0}
+        />
+        <PricePill
+          label="Ongoing"
+          value={formatOngoing(totals.monthlyRecurringTotal, totals.yearlyRecurringTotal)}
+          muted={
+            totals.monthlyRecurringTotal <= 0 && totals.yearlyRecurringTotal <= 0
+          }
+        />
+        {quote.depositEnabled ? (
+          <PricePill label="Deposit" value={formatAud(totals.depositAmount)} />
+        ) : null}
+        {quote.depositEnabled ? (
+          <PricePill label="Balance" value={formatAud(totals.remainingBalance)} />
+        ) : null}
       </div>
 
       {quote.inclusions.length > 0 ? (
@@ -129,12 +155,51 @@ export function GeneratedQuoteCard({
       )}
 
       <div className="mt-5 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-        <ActionBtn icon={Sparkles} label="Review Quote" onClick={onReview} primary />
+        <ActionBtn icon={Sparkles} label="View proposal" onClick={onReview} primary />
         <ActionBtn icon={Pencil} label="Edit Items" onClick={onEditItems} />
         <ActionBtn icon={Link2} label="Copy Link" onClick={onCopyLink} />
-        <ActionBtn icon={Send} label="Send Quote" onClick={onSendQuote} accent />
+        <ActionBtn icon={Send} label="Send quote" onClick={onSendQuote} accent />
       </div>
     </section>
+  )
+}
+
+function formatOngoing(monthly: number, yearly: number): string {
+  const parts: string[] = []
+  if (Number.isFinite(monthly) && monthly > 0) {
+    parts.push(`${formatAud(monthly)}/month`)
+  }
+  if (Number.isFinite(yearly) && yearly > 0) {
+    parts.push(`${formatAud(yearly)}/year`)
+  }
+  return parts.join(' + ') || 'No ongoing support'
+}
+
+function PricePill({
+  label,
+  value,
+  strong,
+  muted,
+}: {
+  label: string
+  value: string
+  strong?: boolean
+  muted?: boolean
+}) {
+  return (
+    <div className="rounded-xl border border-blue-500/20 bg-blue-500/8 px-3 py-2">
+      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+        {label}
+      </p>
+      <p
+        className={cn(
+          'mt-1 text-sm font-semibold',
+          strong ? 'text-slate-50' : muted ? 'text-slate-500' : 'text-cyan-200',
+        )}
+      >
+        {value}
+      </p>
+    </div>
   )
 }
 

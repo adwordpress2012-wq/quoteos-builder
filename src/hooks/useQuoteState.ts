@@ -5,6 +5,7 @@ import { parseMicahPrompt } from '../lib/quoteos/generateQuote'
 import {
   applyPresetToLineItems,
   getPresetByQuoteType,
+  getPackagePriceById,
 } from '../lib/quoteos/pricing'
 import {
   buildMicahSetupNote,
@@ -67,9 +68,14 @@ export function useQuoteState(setupConfig?: SqbaSetupConfig | null) {
     setQuote((prev) => {
       const next: QuoteFormState = { ...prev, quoteTypeId }
       if (preset) {
+        const price = getPackagePriceById(quoteTypeId)
+        next.quoteGenerated = true
         next.lineItems = applyPresetToLineItems(preset)
         next.inclusions = [...preset.inclusions]
-        if (preset.suggestedSummary && !prev.projectSummary.trim()) {
+        if (price?.label) {
+          next.projectTitle = price.label
+        }
+        if (preset.suggestedSummary) {
           next.projectSummary = preset.suggestedSummary
         }
         if (preset.suggestedPaymentTerms) {

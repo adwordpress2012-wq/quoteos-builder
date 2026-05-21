@@ -1,5 +1,5 @@
 import { createLineItem, type QuoteTypeId } from './types'
-import type { LineItem } from './types'
+import type { LineItem, QuoteFormState } from './types'
 
 export type PricingPreset = {
   id: QuoteTypeId
@@ -11,6 +11,78 @@ export type PricingPreset = {
 }
 
 const dosPresets: PricingPreset[] = [
+  {
+    id: 'dos-website-starter',
+    label: 'Website Starter Package',
+    lineItems: [
+      { label: 'Website Starter Package', amount: 990, billingType: 'one-off' },
+      { label: 'Ongoing support', amount: 29, billingType: 'monthly' },
+    ],
+    inclusions: [
+      'One-page mobile-friendly website',
+      'Contact form',
+      'Basic Google setup',
+      'Launch support',
+    ],
+    suggestedSummary:
+      'Simple one-page website package for a tradie who needs a clean online presence and easy enquiries.',
+    suggestedPaymentTerms:
+      '50% deposit to start. Balance due before launch. Ongoing support billed monthly.',
+  },
+  {
+    id: 'dos-website-growth',
+    label: 'Website Growth Package',
+    lineItems: [
+      { label: 'Website Growth Package', amount: 1990, billingType: 'one-off' },
+      { label: 'Ongoing support', amount: 49, billingType: 'monthly' },
+    ],
+    inclusions: [
+      'One-page mobile-friendly website',
+      'Google Business setup',
+      'Professional email setup',
+      'Lead capture form',
+      'Basic SEO setup',
+      'Launch support',
+    ],
+    suggestedSummary:
+      'Packaged one-page website with Google setup, email setup, lead capture and monthly support.',
+    suggestedPaymentTerms:
+      '50% deposit to start. Balance due before launch. Ongoing support billed monthly.',
+  },
+  {
+    id: 'dos-website-premium',
+    label: 'Website Premium Package',
+    lineItems: [
+      { label: 'Website Premium Package', amount: 3490, billingType: 'one-off' },
+      { label: 'Ongoing support', amount: 99, billingType: 'monthly' },
+    ],
+    inclusions: [
+      'Multi-section website',
+      'Google Business setup',
+      'Professional email setup',
+      'Lead capture form',
+      'Smart booking or enquiry flow',
+      'SEO foundation',
+      'Priority launch support',
+    ],
+    suggestedSummary:
+      'Premium website package with stronger lead capture, setup support and ongoing monthly care.',
+    suggestedPaymentTerms:
+      '50% deposit to start. Balance due before launch. Ongoing support billed monthly.',
+  },
+  {
+    id: 'dos-website-custom',
+    label: 'Custom Website Package',
+    lineItems: [],
+    inclusions: [
+      'Custom scope to be confirmed',
+      'Website package pricing to be set manually',
+    ],
+    suggestedSummary:
+      'Custom website package. Confirm the scope and set the price before sending.',
+    suggestedPaymentTerms:
+      'Set deposit, balance and ongoing support once pricing is confirmed.',
+  },
   {
     id: 'dos-website-rebuild',
     label: 'Website Rebuild',
@@ -223,14 +295,68 @@ const tradiePresets: PricingPreset[] = [
 
 export const PRICING_PRESETS: PricingPreset[] = [...dosPresets, ...tradiePresets]
 
+export type PackagePrice = {
+  id: QuoteTypeId
+  label: string
+  setupPrice: number | null
+  monthlyPrice: number | null
+  yearlyPrice: number | null
+  inclusions: string[]
+  suggestedSummary: string
+  suggestedPaymentTerms?: string
+  hasPrice: boolean
+  missingMessage?: string
+}
+
+function safeAmount(amount: number): number {
+  return Number.isFinite(amount) && amount >= 0 ? amount : 0
+}
+
 export function getPresetByQuoteType(
   quoteTypeId: QuoteTypeId,
 ): PricingPreset | undefined {
   return PRICING_PRESETS.find((p) => p.id === quoteTypeId)
 }
 
+export function getPackagePriceById(
+  packageId: QuoteTypeId,
+): PackagePrice | undefined {
+  const preset = getPresetByQuoteType(packageId)
+  if (!preset) return undefined
+
+  const setupPrice = preset.lineItems
+    .filter((item) => item.billingType === 'one-off')
+    .reduce((sum, item) => sum + safeAmount(item.amount), 0)
+  const monthlyPrice = preset.lineItems
+    .filter((item) => item.billingType === 'monthly')
+    .reduce((sum, item) => sum + safeAmount(item.amount), 0)
+  const yearlyPrice = preset.lineItems
+    .filter((item) => item.billingType === 'yearly')
+    .reduce((sum, item) => sum + safeAmount(item.amount), 0)
+  const hasPrice = setupPrice > 0 || monthlyPrice > 0 || yearlyPrice > 0
+
+  return {
+    id: preset.id,
+    label: preset.label || 'Custom Package',
+    setupPrice: setupPrice > 0 ? setupPrice : null,
+    monthlyPrice: monthlyPrice > 0 ? monthlyPrice : null,
+    yearlyPrice: yearlyPrice > 0 ? yearlyPrice : null,
+    inclusions: preset.inclusions,
+    suggestedSummary: preset.suggestedSummary ?? '',
+    suggestedPaymentTerms: preset.suggestedPaymentTerms,
+    hasPrice,
+    missingMessage: hasPrice ? undefined : 'Pricing missing — please set price',
+  }
+}
+
 export function applyPresetToLineItems(preset: PricingPreset) {
-  return preset.lineItems.map((item) => createLineItem(item))
+  return preset.lineItems.map((item) =>
+    createLineItem({
+      ...item,
+      label: item.label.trim() || preset.label,
+      amount: safeAmount(item.amount),
+    }),
+  )
 }
 
 export function getPresetOptionsForSidebar() {
@@ -238,8 +364,10 @@ export function getPresetOptionsForSidebar() {
 }
 
 const WEBSITE_PACKAGE_IDS = new Set<QuoteTypeId>([
-  'dos-website-rebuild',
-  'new-website-build',
+  'dos-website-starter',
+  'dos-website-growth',
+  'dos-website-premium',
+  'dos-website-custom',
 ])
 
 const ADDON_SERVICE_IDS = new Set<QuoteTypeId>([
@@ -259,6 +387,13 @@ export type PricingCatalogGroup = {
   options: { id: QuoteTypeId; label: string }[]
 }
 
+const websiteDropdownLabels: Partial<Record<QuoteTypeId, string>> = {
+  'dos-website-starter': 'Starter',
+  'dos-website-growth': 'Growth',
+  'dos-website-premium': 'Premium',
+  'dos-website-custom': 'Custom',
+}
+
 export function getPricingCatalogGroups(): PricingCatalogGroup[] {
   const website = PRICING_PRESETS.filter((p) => WEBSITE_PACKAGE_IDS.has(p.id))
   const addons = PRICING_PRESETS.filter((p) => ADDON_SERVICE_IDS.has(p.id))
@@ -268,7 +403,10 @@ export function getPricingCatalogGroups(): PricingCatalogGroup[] {
     {
       id: 'website',
       label: 'DOS Website Packages',
-      options: website.map((p) => ({ id: p.id, label: p.label })),
+      options: website.map((p) => ({
+        id: p.id,
+        label: websiteDropdownLabels[p.id] ?? p.label,
+      })),
     },
     {
       id: 'addon',
@@ -281,4 +419,51 @@ export function getPricingCatalogGroups(): PricingCatalogGroup[] {
       options: support.map((p) => ({ id: p.id, label: p.label })),
     },
   ]
+}
+
+export type QuotePricingValidation = {
+  canSend: boolean
+  statusLabel: 'Ready to send' | 'Price missing'
+  warnings: string[]
+}
+
+export function validateQuotePricing(
+  quote: QuoteFormState,
+): QuotePricingValidation {
+  const warnings: string[] = []
+  const selectedPackage = getPackagePriceById(quote.quoteTypeId)
+
+  if (!quote.quoteTypeId) {
+    warnings.push('Package missing')
+  }
+
+  if (!selectedPackage?.hasPrice) {
+    warnings.push('Price missing')
+  }
+
+  if (!selectedPackage?.label?.trim()) {
+    warnings.push('Package name missing')
+  }
+
+  const hasInvalidLine = quote.lineItems.some(
+    (item) => !Number.isFinite(item.amount) || item.amount < 0,
+  )
+  if (hasInvalidLine) {
+    warnings.push('Invalid price')
+  }
+
+  const hasBrokenRecurring = quote.lineItems.some(
+    (item) =>
+      item.billingType !== 'one-off' &&
+      (!Number.isFinite(item.amount) || item.amount <= 0),
+  )
+  if (hasBrokenRecurring) {
+    warnings.push('Recurring price missing')
+  }
+
+  return {
+    canSend: warnings.length === 0,
+    statusLabel: warnings.length === 0 ? 'Ready to send' : 'Price missing',
+    warnings,
+  }
 }
