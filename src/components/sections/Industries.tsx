@@ -79,13 +79,7 @@ export function Industries() {
                 Send polished quotes from site, follow up automatically, and
                 win more emergency and renovation work without late-night admin.
               </p>
-              <Button
-                href="https://app.quoteos.com.au"
-                target="_blank"
-                rel="noopener noreferrer"
-                size="md"
-                className="mt-6"
-              >
+              <Button href="/app/builder" size="md" className="mt-6">
                 Start Quoting
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Button>

@@ -225,3 +225,54 @@
     transform: none;
   }
 }
+
+/* SQB — print only the proposal section */
+@media print {
+  body {
+    background: #fff !important;
+    color: #0f172a !important;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  #proposal-print-section,
+  #proposal-print-section * {
+    visibility: visible;
+  }
+
+  #proposal-print-section {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 1.5rem;
+    border: none !important;
+    box-shadow: none !important;
+    background: #fff !important;
+    color: #0f172a !important;
+  }
+
+  #proposal-print-section h1,
+  #proposal-print-section p,
+  #proposal-print-section dt,
+  #proposal-print-section dd,
+  #proposal-print-section td,
+  #proposal-print-section li,
+  #proposal-print-section span {
+    color: #0f172a !important;
+  }
+
+  #proposal-print-section .text-slate-400,
+  #proposal-print-section .text-slate-500 {
+    color: #475569 !important;
+  }
+
+  #proposal-print-section .glass-card,
+  #proposal-print-section .rounded-xl {
+    background: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+  }
+}

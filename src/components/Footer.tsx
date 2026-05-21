@@ -3,7 +3,7 @@ import { ExternalLink } from 'lucide-react'
 const footerLinks = [
   { label: 'Features', href: '#features' },
   { label: 'Industries', href: '#industries' },
-  { label: 'Launch App', href: 'https://app.quoteos.com.au' },
+  { label: 'Launch App', href: '/app/builder' },
 ]
 
 export function Footer() {

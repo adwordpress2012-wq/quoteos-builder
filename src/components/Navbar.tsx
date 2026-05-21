@@ -11,7 +11,7 @@ export function Navbar() {
     <header className="sticky top-0 z-50 border-b border-[var(--qos-border)] bg-[var(--qos-bg)]/90 shadow-[inset_0_-1px_0_rgba(59,130,246,0.08)] backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5 sm:h-[4.25rem] sm:px-6 lg:px-8">
         <a
-          href="#"
+          href="/"
           className="group flex shrink-0 items-center gap-2.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-400"
         >
           <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-blue-500/40 bg-gradient-to-br from-blue-600/30 to-purple-500/20 text-sm font-bold tracking-tight text-cyan-200 shadow-[var(--qos-glow-blue)] transition-all duration-300 group-hover:border-blue-400/55 group-hover:shadow-[0_0_32px_rgba(59,130,246,0.5),0_0_20px_rgba(139,92,246,0.2)]">
@@ -54,13 +54,7 @@ export function Navbar() {
             <span className="sm:hidden">DOS</span>
             <span className="hidden sm:inline">Powered by DOS</span>
           </Button>
-          <Button
-            href="https://app.quoteos.com.au"
-            target="_blank"
-            rel="noopener noreferrer"
-            variant="primary"
-            size="sm"
-          >
+          <Button href="/app/builder" variant="primary" size="sm">
             Launch App
           </Button>
         </div>

@@ -28,13 +28,7 @@ export function CtaBanner() {
               follow-ups — without adding complexity to how you run the business.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
-              <Button
-                href="https://app.quoteos.com.au"
-                target="_blank"
-                rel="noopener noreferrer"
-                size="lg"
-                className="w-full sm:w-auto"
-              >
+              <Button href="/app/builder" size="lg" className="w-full sm:w-auto">
                 Launch App
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Button>

@@ -51,13 +51,7 @@ export function Hero() {
           </p>
 
           <div className="animate-fade-in animation-delay-300 mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
-            <Button
-              href="https://app.quoteos.com.au"
-              target="_blank"
-              rel="noopener noreferrer"
-              size="lg"
-              className="w-full sm:w-auto"
-            >
+            <Button href="/app/builder" size="lg" className="w-full sm:w-auto">
               Start Building Quotes
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Button>

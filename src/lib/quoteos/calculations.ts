@@ -1,0 +1,54 @@
+import type { LineItem, QuoteFormState, QuoteTotals } from './types'
+
+export function calculateTotals(
+  lineItems: LineItem[],
+  depositEnabled: boolean,
+): QuoteTotals {
+  const oneOffTotal = lineItems
+    .filter((i) => i.billingType === 'one-off')
+    .reduce((sum, i) => sum + (Number.isFinite(i.amount) ? i.amount : 0), 0)
+
+  const monthlyRecurringTotal = lineItems
+    .filter((i) => i.billingType === 'monthly')
+    .reduce((sum, i) => sum + (Number.isFinite(i.amount) ? i.amount : 0), 0)
+
+  const yearlyRecurringTotal = lineItems
+    .filter((i) => i.billingType === 'yearly')
+    .reduce((sum, i) => sum + (Number.isFinite(i.amount) ? i.amount : 0), 0)
+
+  const subtotal = oneOffTotal + monthlyRecurringTotal + yearlyRecurringTotal
+
+  const depositBase = oneOffTotal > 0 ? oneOffTotal : subtotal
+  const depositAmount = depositEnabled ? depositBase * 0.5 : 0
+  const remainingBalance = depositEnabled
+    ? Math.max(depositBase - depositAmount, 0)
+    : depositBase
+
+  return {
+    subtotal,
+    oneOffTotal,
+    monthlyRecurringTotal,
+    yearlyRecurringTotal,
+    depositAmount,
+    remainingBalance,
+  }
+}
+
+export function formatAud(amount: number): string {
+  return new Intl.NumberFormat('en-AU', {
+    style: 'currency',
+    currency: 'AUD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(amount)
+}
+
+export function getQuoteDisplayTitle(state: QuoteFormState): string {
+  if (state.projectTitle.trim()) return state.projectTitle.trim()
+  const type = state.quoteTypeId
+  if (type === 'custom') return 'Custom Quote'
+  return type
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ')
+}

@@ -1,28 +1,16 @@
-import { Navbar } from './components/Navbar'
-import { Footer } from './components/Footer'
-import { Hero } from './components/sections/Hero'
-import { Benefits } from './components/sections/Benefits'
-import { Features } from './components/sections/Features'
-import { Industries } from './components/sections/Industries'
-import { CtaBanner } from './components/sections/CtaBanner'
-import { SectionDivider } from './components/SectionDivider'
+import { Routes, Route } from 'react-router-dom'
+import { LandingPage } from './pages/LandingPage'
+import { AppDashboardPage } from './pages/AppDashboardPage'
+import { QuoteBuilderPage } from './pages/QuoteBuilderPage'
 
 function App() {
   return (
-    <div className="min-h-svh bg-quoteos-page text-slate-300 antialiased">
-      <Navbar />
-      <main>
-        <Hero />
-        <SectionDivider />
-        <Benefits />
-        <SectionDivider />
-        <Features />
-        <SectionDivider />
-        <Industries />
-        <CtaBanner />
-      </main>
-      <Footer />
-    </div>
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/app" element={<AppDashboardPage />} />
+      <Route path="/app/dashboard" element={<AppDashboardPage />} />
+      <Route path="/app/builder" element={<QuoteBuilderPage />} />
+    </Routes>
   )
 }
 

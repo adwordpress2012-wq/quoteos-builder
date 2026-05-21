@@ -1,0 +1,17 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.quoteos.com.au"
+        }
+      ],
+      "destination": "https://quoteos.com.au/:path*",
+      "permanent": true
+    }
+  ]
+}
