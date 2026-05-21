@@ -1,9 +1,11 @@
 import { formatAud, getQuoteDisplayTitle } from './calculations'
+import type { WritingToneId } from './setup-wizard'
 import type { QuoteFormState, QuoteTotals } from './types'
 
 export function generateEmailDraft(
   state: QuoteFormState,
   totals: QuoteTotals,
+  writingTone: WritingToneId = 'professional',
 ): string {
   const name = state.contactName.trim() || 'there'
   const business = state.clientBusinessName.trim() || 'your business'
@@ -46,17 +48,38 @@ export function generateEmailDraft(
     lines.push('', `This quote is valid until ${state.quoteExpiryDate}.`)
   }
 
-  lines.push(
-    '',
-    '**Next step**',
-    'Reply to this email to accept the quote or ask any questions — we’re happy to adjust scope if needed.',
-    '',
-    'Kind regards,',
-    'The DOS Team',
-    'QuoteOS — Smart Quote Builder',
-    'Powered by Directive Operating Systems (DOS)',
-    'https://directiveos.com.au',
-  )
+  const nextStep =
+    writingTone === 'simple'
+      ? 'Reply to accept or ask a question.'
+      : writingTone === 'casual-au'
+        ? 'Reply if you are happy to go ahead, or shout if you have any questions.'
+        : writingTone === 'premium'
+          ? 'Please reply to confirm approval or request any clarifications at your convenience.'
+          : 'Reply to this email to accept the quote or ask any questions — we’re happy to adjust scope if needed.'
+
+  const signOff =
+    writingTone === 'casual-au'
+      ? ['Cheers,']
+      : writingTone === 'premium'
+        ? ['Kind regards,', 'Your service team']
+        : ['Kind regards,', 'The DOS Team']
+
+  lines.push('', '**Next step**', nextStep, '', ...signOff)
+
+  if (writingTone !== 'casual-au' && writingTone !== 'simple') {
+    lines.push(
+      'QuoteOS — Smart Quote Builder',
+      'Powered by Directive Operating Systems (DOS)',
+      'https://directiveos.com.au',
+    )
+  }
+
+  if (writingTone === 'simple') {
+    return lines
+      .filter((line) => !line.startsWith('**'))
+      .map((line) => line.replace(/\*\*/g, ''))
+      .join('\n')
+  }
 
   return lines.join('\n')
 }

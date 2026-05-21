@@ -205,6 +205,16 @@
       0 0 20px rgba(59, 130, 246, 0.35),
       inset 0 0 12px rgba(59, 130, 246, 0.08);
   }
+
+  .builder-main {
+    padding-bottom: max(7rem, env(safe-area-inset-bottom, 0px) + 5rem);
+  }
+
+  @media (min-width: 1280px) {
+    .builder-main {
+      padding-bottom: 2rem;
+    }
+  }
 }
 
 @keyframes fade-in {

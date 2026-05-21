@@ -1,5 +1,23 @@
 export type BillingType = 'one-off' | 'monthly' | 'yearly'
 
+export type BusinessTypeId =
+  | 'plumber'
+  | 'electrician'
+  | 'painter'
+  | 'fencing'
+  | 'landscaping'
+  | 'agency'
+  | 'dos-client'
+
+export type QuoteStatus =
+  | 'draft'
+  | 'sent'
+  | 'follow-up'
+  | 'accepted'
+  | 'lost'
+
+export type PackageTierId = 'starter' | 'growth' | 'premium'
+
 export type QuoteTypeId =
   | 'dos-website-rebuild'
   | 'new-website-build'
@@ -53,6 +71,8 @@ export type QuoteFormState = {
   email: string
   phone: string
   businessType: string
+  businessTypeId: BusinessTypeId
+  sqbaQuoteOptionId: string
   projectTitle: string
   quoteTypeId: QuoteTypeId
   projectSummary: string
@@ -62,6 +82,10 @@ export type QuoteFormState = {
   lineItems: LineItem[]
   inclusions: string[]
   depositEnabled: boolean
+  quoteStatus: QuoteStatus
+  packageTier: PackageTierId | null
+  micahPrompt: string
+  quoteGenerated: boolean
 }
 
 export type QuoteTotals = {
@@ -112,6 +136,8 @@ export function defaultQuoteState(): QuoteFormState {
     email: '',
     phone: '',
     businessType: '',
+    businessTypeId: 'plumber',
+    sqbaQuoteOptionId: 'plumber-custom',
     projectTitle: '',
     quoteTypeId: 'custom',
     projectSummary: '',
@@ -121,5 +147,9 @@ export function defaultQuoteState(): QuoteFormState {
     lineItems: [createLineItem({ label: 'Service', amount: 0 })],
     inclusions: [],
     depositEnabled: true,
+    quoteStatus: 'draft',
+    packageTier: null,
+    micahPrompt: '',
+    quoteGenerated: false,
   }
 }
