@@ -7,7 +7,7 @@ import {
 import type { SqbaSetupConfig } from '../lib/quoteos/setup-wizard'
 import { getQuoteDisplayTitle } from '../lib/quoteos/calculations'
 import { AppShell } from '../components/app/AppShell'
-import { AppSidebar } from '../components/app/AppSidebar'
+import { CommandCentreSidebar } from '../components/command/CommandCentreSidebar'
 import { BuilderOverlay } from '../components/app/BuilderOverlay'
 import { CompactEmailCard } from '../components/app/CompactEmailCard'
 import { EmailDraftPanel } from '../components/app/EmailDraftPanel'
@@ -107,7 +107,7 @@ export function QuoteBuilderPage() {
   return (
     <AppShell>
       <div className="flex min-h-[calc(100svh-3.5rem)] sm:min-h-[calc(100svh-4rem)]">
-        <AppSidebar onNewQuote={resetQuote} />
+        <CommandCentreSidebar onNewQuote={resetQuote} className="hidden lg:flex" />
 
         <div className="flex min-w-0 flex-1 flex-col">
           <main className="builder-main mx-auto w-full flex-1 overflow-x-clip px-4 py-4 pb-28 sm:px-6 sm:py-5 xl:max-w-none xl:pb-12 xl:pr-6">

@@ -2,14 +2,20 @@ import { useMemo, useRef, useState, type FormEvent } from 'react'
 import { CalendarDays, MessageCircle, Send, X } from 'lucide-react'
 import {
   PLUMBING_JOB_TYPES,
+  buildTradieNotificationDraft,
   emptyScwLeadDraft,
+  extractValidEmail,
+  extractValidPhone,
+  getOperationalSuggestions,
   getNextMissingScwField,
   getQuoteIntakeSummary,
   getScwQuestionForField,
+  isEmailSkipRequest,
   looksEmergency,
+  prepareQuoteDraftFromLead,
   prepareSqbaLeadFromScwConversation,
-  updateScwLeadFromMessage,
   type ScwLeadDraft,
+  updateScwLeadFromMessage,
 } from '../../lib/quoteos/scw'
 import { cn } from '../../lib/utils'
 
@@ -32,7 +38,11 @@ function nextMessageForLead(lead: ScwLeadDraft, lastMessage: string): string {
   const nextField = getNextMissingScwField(lead)
   if (nextField) return getScwQuestionForField(nextField, lead)
 
-  return "Thanks, I've got the details. Luke can review this and send you a quote or booking confirmation shortly."
+  return "Thanks, I've got the details. Luke will review this before any quote, message, or booking response is sent."
+}
+
+function isNoPreferredTime(value: string): boolean {
+  return /^(no|no thanks|no preference|flexible|skip|not sure)$/i.test(value.trim())
 }
 
 export function MicahScwWidget() {
@@ -50,6 +60,18 @@ export function MicahScwWidget() {
     () => (lead.quoteDraftStatus === 'ready' ? prepareSqbaLeadFromScwConversation(lead) : null),
     [lead],
   )
+  const notificationDraft = useMemo(
+    () => (preparedLead ? buildTradieNotificationDraft(preparedLead) : null),
+    [preparedLead],
+  )
+  const quoteDraft = useMemo(
+    () => (preparedLead ? prepareQuoteDraftFromLead(preparedLead) : null),
+    [preparedLead],
+  )
+  const operationalSuggestions = useMemo(
+    () => (preparedLead ? getOperationalSuggestions({ lead: preparedLead }) : []),
+    [preparedLead],
+  )
 
   function appendMessage(role: ChatMessage['role'], text: string): ChatMessage {
     const message = { id: nextId.current, role, text }
@@ -62,8 +84,38 @@ export function MicahScwWidget() {
     if (!value) return
 
     const activeField = getNextMissingScwField(lead) ?? 'jobDescription'
+
+    if (activeField === 'email' && !extractValidEmail(value) && !isEmailSkipRequest(value)) {
+      setMessages((current) => [
+        ...current,
+        appendMessage('customer', value),
+        appendMessage(
+          'assistant',
+          "That doesn't look like an email address. Please type your email, or type skip if you prefer SMS/call only.",
+        ),
+      ])
+      setDraft('')
+      return
+    }
+
+    if (activeField === 'phone' && !extractValidPhone(value)) {
+      setMessages((current) => [
+        ...current,
+        appendMessage('customer', value),
+        appendMessage('assistant', 'What phone number should the plumber use to contact you?'),
+      ])
+      setDraft('')
+      return
+    }
+
     const updatedLead = updateScwLeadFromMessage(lead, activeField, value)
-    const assistantReply = nextMessageForLead(updatedLead, value)
+    const assistantReply =
+      activeField === 'preferredTime'
+        ? `${isNoPreferredTime(value) ? 'No problem, I have marked the timing as flexible.' : "I've noted your preferred time. The team will confirm availability."} ${getScwQuestionForField(
+            'permissionToContact',
+            updatedLead,
+          )}`
+        : nextMessageForLead(updatedLead, value)
 
     setLead(updatedLead)
     setMessages((current) => [
@@ -130,18 +182,35 @@ export function MicahScwWidget() {
             {preparedLead ? (
               <div className="rounded-xl border border-blue-100 bg-white p-3 text-xs text-slate-700 shadow-sm">
                 <p className="mb-2 font-semibold text-slate-900">SQBA-ready lead</p>
-                <p className="whitespace-pre-line leading-relaxed">{getQuoteIntakeSummary(preparedLead.lead)}</p>
+                <p className="whitespace-pre-line leading-relaxed">{getQuoteIntakeSummary(preparedLead)}</p>
                 <div className="mt-3 rounded-lg bg-slate-50 p-2">
                   <p className="font-medium text-slate-800">Notification placeholders</p>
-                  <p className="mt-1 text-slate-600">{preparedLead.notificationDrafts.resendEmailToTradie}</p>
+                  <p className="mt-1 font-medium text-slate-700">{notificationDraft?.subject}</p>
+                  <p className="mt-1 whitespace-pre-line text-slate-600">{notificationDraft?.body}</p>
                   <p className="mt-1 text-slate-500">No email, SMS, WhatsApp, invoice, or quote is sent automatically.</p>
                 </div>
+                {quoteDraft ? (
+                  <div className="mt-3 rounded-lg bg-blue-50 p-2">
+                    <p className="font-medium text-blue-950">Quote prep</p>
+                    <p className="mt-1 text-blue-900">{quoteDraft.suggestedPackageTitle}</p>
+                    <p className="mt-1 text-blue-800">{quoteDraft.customerFriendlySummary}</p>
+                  </div>
+                ) : null}
+                {operationalSuggestions.length > 0 ? (
+                  <ul className="mt-3 space-y-1 rounded-lg bg-amber-50 p-2 text-amber-900">
+                    {operationalSuggestions.map((suggestion) => (
+                      <li key={`${suggestion.type}-${suggestion.message}`}>
+                        {suggestion.message}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
                 <details className="mt-3">
                   <summary className="cursor-pointer font-medium text-blue-700">
                     View local data object
                   </summary>
                   <pre className="mt-2 max-h-44 overflow-auto rounded-lg bg-slate-950 p-2 text-[11px] text-slate-100">
-                    {JSON.stringify(preparedLead.lead, null, 2)}
+                    {JSON.stringify(preparedLead, null, 2)}
                   </pre>
                 </details>
               </div>
@@ -196,7 +265,7 @@ export function MicahScwWidget() {
 
             {preparedLead ? (
               <a
-                href={preparedLead.booking.placeholderUrl}
+                href="https://calendar.google.com/"
                 target="_blank"
                 rel="noreferrer"
                 className="mb-2 flex items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-medium text-blue-800 transition hover:bg-blue-100"

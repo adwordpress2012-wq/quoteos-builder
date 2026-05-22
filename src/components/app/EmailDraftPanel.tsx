@@ -1,9 +1,11 @@
-import { Copy, ExternalLink, Mail, Sparkles } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Copy, ExternalLink, Mail, Sparkles, ChevronDown } from 'lucide-react'
 import { getQuoteDisplayTitle } from '../../lib/quoteos/calculations'
 import { generateMicahSuggestion } from '../../lib/quoteos/micah'
 import type { MicahActionId, QuoteFormState } from '../../lib/quoteos/types'
 import { MICAH_ACTIONS } from '../../lib/quoteos/types'
 import { builderTextareaClass } from './builder-styles'
+import { cn } from '../../lib/utils'
 
 const COMPOSER_ACTIONS: MicahActionId[] = [
   'fix-grammar',
@@ -33,7 +35,12 @@ export function EmailDraftPanel({
   quote,
   onEmailDraftChange,
 }: EmailDraftPanelProps) {
-  const subject = `Quote: ${getQuoteDisplayTitle(quote)}`
+  const [subject, setSubject] = useState(
+    () => `Quote: ${getQuoteDisplayTitle(quote)}`,
+  )
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
   const mailto = `mailto:${encodeURIComponent(quote.email || '')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailDraft)}`
 
   const runAction = (action: MicahActionId) => {
@@ -44,7 +51,22 @@ export function EmailDraftPanel({
       businessName: quote.clientBusinessName,
     })
     onEmailDraftChange(result.text)
+    setSuggestionsOpen(false)
   }
+
+  useEffect(() => {
+    if (!suggestionsOpen) return
+    const onDocClick = (e: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setSuggestionsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onDocClick)
+    return () => document.removeEventListener('mousedown', onDocClick)
+  }, [suggestionsOpen])
 
   return (
     <div>
@@ -62,14 +84,14 @@ export function EmailDraftPanel({
           Subject
         </span>
         <input
-          readOnly
           value={subject}
-          className="w-full min-h-[48px] rounded-xl border border-blue-500/25 bg-[rgba(10,15,30,0.75)] px-4 py-3 text-base text-slate-300"
+          onChange={(e) => setSubject(e.target.value)}
+          className="w-full min-h-[48px] rounded-xl border border-blue-500/25 bg-[rgba(10,15,30,0.75)] px-4 py-3 text-base text-slate-100"
           aria-label="Email subject"
         />
       </label>
 
-      <div className="relative mt-4">
+      <div className="relative mt-4" ref={dropdownRef}>
         <textarea
           className={builderTextareaClass}
           style={{ minHeight: '220px' }}
@@ -77,15 +99,60 @@ export function EmailDraftPanel({
           onChange={(e) => onEmailDraftChange(e.target.value)}
           aria-label="Email draft"
         />
-        <button
-          type="button"
-          title="Micah rewrite"
-          className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-lg border border-purple-500/35 bg-purple-500/20 text-purple-200 transition-all hover:border-cyan-400/40"
-          onClick={() => runAction('improve-cta')}
-        >
-          <Sparkles className="h-4 w-4" aria-hidden="true" />
-          <span className="sr-only">Micah improve CTA</span>
-        </button>
+
+        <div className="absolute right-3 top-3 flex flex-col items-end gap-2">
+          <button
+            type="button"
+            title="Micah suggestions"
+            aria-expanded={suggestionsOpen}
+            aria-haspopup="listbox"
+            className={cn(
+              'flex h-11 min-w-[44px] items-center justify-center gap-1 rounded-xl border px-2 transition-all',
+              suggestionsOpen
+                ? 'border-cyan-400/50 bg-cyan-500/25 text-cyan-100 shadow-[var(--qos-glow-blue)]'
+                : 'border-purple-500/35 bg-purple-500/25 text-purple-100 hover:border-cyan-400/40',
+            )}
+            onClick={() => setSuggestionsOpen((o) => !o)}
+          >
+            <Sparkles className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <ChevronDown
+              className={cn(
+                'h-3.5 w-3.5 transition-transform',
+                suggestionsOpen && 'rotate-180',
+              )}
+              aria-hidden="true"
+            />
+            <span className="sr-only">Micah suggestions</span>
+          </button>
+
+          {suggestionsOpen ? (
+            <div
+              role="listbox"
+              aria-label="Micah email suggestions"
+              className="z-20 w-[min(280px,calc(100vw-3rem))] overflow-hidden rounded-xl border border-cyan-400/35 bg-[#0a0f1e] shadow-[0_8px_32px_rgba(0,0,0,0.5),var(--qos-glow-blue)]"
+            >
+              <p className="border-b border-blue-500/20 px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-cyan-300">
+                Micah suggestions
+              </p>
+              <ul className="max-h-[280px] overflow-y-auto py-1">
+                {MICAH_ACTIONS.filter((a) => COMPOSER_ACTIONS.includes(a.id)).map(
+                  (action) => (
+                    <li key={action.id}>
+                      <button
+                        type="button"
+                        role="option"
+                        className="flex min-h-[44px] w-full items-center px-4 text-left text-sm text-slate-200 transition-colors hover:bg-cyan-500/15 hover:text-cyan-100"
+                        onClick={() => runAction(action.id)}
+                      >
+                        {action.label}
+                      </button>
+                    </li>
+                  ),
+                )}
+              </ul>
+            </div>
+          ) : null}
+        </div>
       </div>
 
       <div className="mt-3 flex flex-wrap gap-2">
@@ -106,11 +173,11 @@ export function EmailDraftPanel({
       <div className="mt-4 flex flex-col gap-2 sm:flex-row">
         <button
           type="button"
-          onClick={() => copyText(emailDraft)}
+          onClick={() => copyText(`Subject: ${subject}\n\n${emailDraft}`)}
           className="inline-flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-xl border border-[var(--qos-border)] bg-white/[0.04] px-4 text-sm font-medium text-slate-200"
         >
           <Copy className="h-4 w-4" aria-hidden="true" />
-          Copy Email
+          Copy email
         </button>
         <a
           href={mailto}

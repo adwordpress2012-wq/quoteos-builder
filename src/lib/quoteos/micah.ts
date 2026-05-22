@@ -97,6 +97,18 @@ export type MicahInvoiceSuggestionResult = {
 
 const REVIEW_REQUIRED = true as const
 
+const QUOTEOS_PRICING_ANSWER =
+  'Starter is $297 setup, $97/month, plus $390/year hosting and support. Growth is $997 setup, $297/month, plus $490/year hosting and support. Scale is custom for larger teams or higher enquiry volume.'
+
+const QUOTEOS_WORKFLOW_ANSWER =
+  'QuoteOS works simply: a customer visits the tradie website, chats with Micah SCW, Micah collects the job details, prepares SQBA-ready lead data, and the tradie gets notified. The tradie reviews everything, prepares and sends the quote, notes any booking request through Calendly or Google Calendar, and can send a PDF quote or invoice. PayID or bank transfer comes first; Stripe or Square can be added later.'
+
+const SQBA_ANSWER =
+  'SQBA is the QuoteOS dashboard logic for lead review, quote preparation, email drafts, follow-up reminders, PDF quote/invoice prep, and payment wording. It keeps everything review-only so the tradie approves before anything goes out.'
+
+const QUOTEOS_REVIEW_GUARDRAIL =
+  'Micah prepares drafts only. The tradie reviews before anything is sent, quoted, invoiced, or booked.'
+
 const packageWords: Record<BusinessTypeId, string> = {
   plumber: 'Plumbing',
   electrician: 'Electrical',
@@ -188,6 +200,49 @@ export function answerMicahQuestion(
   const inclusions = getQuoteInclusionText(quote)
   const status = quote.quoteStatus.replace('-', ' ')
   const packageLabel = getSimplePackageName(quote)
+
+  if (
+    /quoteos|this|system|micah|sqba/.test(lower) &&
+    /how.*work|works|process|flow|what.*do|explain/.test(lower)
+  ) {
+    return `${QUOTEOS_WORKFLOW_ANSWER} ${QUOTEOS_REVIEW_GUARDRAIL}`
+  }
+
+  if (/sqba|dashboard|backend|lead review|quote preparation/.test(lower)) {
+    return `${SQBA_ANSWER} ${QUOTEOS_REVIEW_GUARDRAIL}`
+  }
+
+  if (
+    /quoteos|starter|growth|scale|landing page|website|sms|stripe|square|payid|bank transfer|fergus|tradify|simpro|aroflo|servicem8/.test(
+      lower,
+    )
+  ) {
+    if (/how much|price|pricing|cost|charge|starter|growth|scale|plan|package/.test(lower)) {
+      return QUOTEOS_PRICING_ANSWER
+    }
+
+    if (/landing page|one-page|one page|website|site/.test(lower)) {
+      return 'Yes. Starter includes a one-page tradie landing page. Growth includes a custom branded tradie website. Both include Micah SCW for enquiry and quote intake.'
+    }
+
+    if (/sms|text message|message/.test(lower)) {
+      return 'Growth includes SMS notification support. For now, the system prepares the notification workflow and the tradie reviews before anything is sent.'
+    }
+
+    if (/stripe|square|card|payment|payid|bank transfer/.test(lower)) {
+      return 'QuoteOS is PayID and bank transfer first for the MVP. Stripe or Square can come later, after the tradie has reviewed the workflow.'
+    }
+
+    if (/fergus|tradify|simpro|aroflo|servicem8|competitor|compare/.test(lower)) {
+      return 'Tools like Fergus, Tradify, Simpro, AroFlo and ServiceM8 usually focus on broader job management, scheduling, invoicing, field teams and accounting integrations. QuoteOS stays simpler: fast enquiry capture, quote preparation, follow-up and less admin for low-tech tradies.'
+    }
+
+    if (/include|included|what.*get|features/.test(lower)) {
+      return 'Starter includes a one-page tradie landing page, Micah SCW, basic SQBA quote workspace, email notifications, PDF quote/invoice and booking link setup. Growth adds a custom branded website, quote assistant/templates, email + SMS notification support, booking integration, follow-up reminders and onboarding/support. Scale is custom for higher volume, multiple users or integrations.'
+    }
+
+    return `${QUOTEOS_WORKFLOW_ANSWER} ${QUOTEOS_PRICING_ANSWER} ${QUOTEOS_REVIEW_GUARDRAIL}`
+  }
 
   if (/how much|price|cost|charge|one-page|one page|google|email/.test(lower)) {
     if (quote.quoteTypeId === 'dos-website-growth') {

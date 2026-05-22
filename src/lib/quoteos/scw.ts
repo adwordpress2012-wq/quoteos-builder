@@ -1,3 +1,6 @@
+import { calculateTotals, formatAud } from './calculations'
+import type { QuoteFormState } from './types'
+
 export const PLUMBING_JOB_TYPES = [
   'hot water system',
   'blocked drain',
@@ -43,6 +46,78 @@ export type SqbaPreparedLead = {
     status: 'request_only'
   }
   reviewRequired: true
+}
+
+export type TradieNotificationDraft = {
+  subject: string
+  body: string
+  reviewRequired: true
+}
+
+export type OptionalResendEnv = {
+  RESEND_API_KEY?: string
+  NOTIFICATION_EMAIL?: string
+  EMAIL_FROM?: string
+}
+
+export type OptionalResendResult = {
+  status: 'draft_only' | 'sent' | 'failed'
+  draft: TradieNotificationDraft
+  reason?: string
+}
+
+export type QuotePreparationDraft = {
+  suggestedPackageTitle: string
+  suggestedLineItems: string[]
+  suggestedNotes: string[]
+  suggestedFollowUpTiming: string
+  suggestedQuoteStatus: 'Draft'
+  customerFriendlySummary: string
+  reviewRequired: true
+}
+
+export type FollowUpDraft = {
+  scenario:
+    | 'quote_sent_no_reply'
+    | 'booking_request_pending'
+    | 'invoice_unpaid'
+    | 'urgent_lead_not_reviewed'
+    | 'lead_review'
+  recommendation: string
+  emailDraft: string
+  smsOrCallNote: string
+  reviewRequired: true
+}
+
+export type InvoicePaymentDetails = {
+  payId?: string
+  bankName?: string
+  accountName?: string
+  bsb?: string
+  accountNumber?: string
+}
+
+export type InvoiceDraft = {
+  invoiceNumber: string
+  amount: string
+  paymentInstructions: string
+  pdfInvoiceWording: string
+  dueDate: string
+  reviewBeforeSending: true
+  missingPaymentDetails: boolean
+}
+
+export type OperationalSuggestion = {
+  type:
+    | 'missing_phone'
+    | 'invalid_email'
+    | 'urgent_job'
+    | 'quote_not_reviewed'
+    | 'follow_up_overdue'
+    | 'unpaid_invoice'
+    | 'recurring_revenue'
+    | 'missing_payment_details'
+  message: string
 }
 
 export type IntakeField =
@@ -261,10 +336,8 @@ export function getQuoteIntakeSummary(lead: ScwLeadDraft): string {
   ].join('\n')
 }
 
-export function prepareSqbaLeadFromScwConversation(
-  lead: ScwLeadDraft,
-): SqbaPreparedLead {
-  const readyLead: ScwLeadDraft = {
+export function prepareSqbaLeadFromScwConversation(lead: ScwLeadDraft): ScwLeadDraft {
+  return {
     ...lead,
     source: 'quoteos_scw',
     businessType: 'plumber',
@@ -272,6 +345,12 @@ export function prepareSqbaLeadFromScwConversation(
     notificationStatus: 'pending',
     channel: 'website_chat',
   }
+}
+
+export function prepareSqbaWorkflowFromScwConversation(
+  lead: ScwLeadDraft,
+): SqbaPreparedLead {
+  const readyLead = prepareSqbaLeadFromScwConversation(lead)
   const jobType = readyLead.jobType || 'plumbing job'
   const suburb = readyLead.suburb || 'unknown suburb'
   const name = readyLead.customerName || 'Customer'
@@ -299,4 +378,230 @@ export function prepareSqbaLeadFromScwConversation(
     },
     reviewRequired: true,
   }
+}
+
+export function buildTradieNotificationDraft(
+  lead: ScwLeadDraft,
+): TradieNotificationDraft {
+  const jobType = lead.jobType || 'plumbing job'
+  const suburb = lead.suburb || 'unknown suburb'
+  const email = lead.email || (lead.emailSkipped ? 'Email skipped' : 'Not provided')
+
+  return {
+    subject: `New QuoteOS enquiry — ${jobType} in ${suburb}`,
+    body: [
+      `Customer: ${lead.customerName || 'Not provided'}`,
+      `Phone: ${lead.phone || 'Not provided'}`,
+      `Email: ${email}`,
+      `Job type: ${jobType}`,
+      `Suburb: ${suburb}`,
+      `Urgency: ${lead.urgency || 'Not provided'}`,
+      `Preferred time: ${lead.preferredTime || 'Not requested'}`,
+      `Notes: ${lead.jobDescription || 'No notes provided'}`,
+      '',
+      'Open SQBA to review this lead, prepare the quote, and confirm the next step.',
+      'Review required before sending any email, quote, SMS, invoice, or booking confirmation.',
+    ].join('\n'),
+    reviewRequired: true,
+  }
+}
+
+export async function sendTradieNotificationWithResend(
+  lead: ScwLeadDraft,
+  env: OptionalResendEnv = {},
+): Promise<OptionalResendResult> {
+  const draft = buildTradieNotificationDraft(lead)
+  const hasConfig = env.RESEND_API_KEY && env.NOTIFICATION_EMAIL && env.EMAIL_FROM
+
+  if (!hasConfig) {
+    return {
+      status: 'draft_only',
+      draft,
+      reason:
+        'Missing RESEND_API_KEY, NOTIFICATION_EMAIL, or EMAIL_FROM. Local draft returned only.',
+    }
+  }
+
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: env.EMAIL_FROM,
+        to: env.NOTIFICATION_EMAIL,
+        subject: draft.subject,
+        text: draft.body,
+      }),
+    })
+
+    if (!response.ok) {
+      return {
+        status: 'failed',
+        draft,
+        reason: `Resend returned ${response.status}. Draft was not confirmed sent.`,
+      }
+    }
+
+    return { status: 'sent', draft }
+  } catch (error) {
+    return {
+      status: 'failed',
+      draft,
+      reason: error instanceof Error ? error.message : 'Unknown Resend error',
+    }
+  }
+}
+
+export function prepareQuoteDraftFromLead(lead: ScwLeadDraft): QuotePreparationDraft {
+  const jobType = lead.jobType || 'plumbing job'
+  const urgent = looksEmergency(`${lead.urgency} ${lead.jobDescription}`)
+  const calloutLine = urgent ? 'Priority callout / make-safe assessment' : 'Site inspection / callout'
+
+  return {
+    suggestedPackageTitle: `${jobType.charAt(0).toUpperCase()}${jobType.slice(1)} quote`,
+    suggestedLineItems: [
+      calloutLine,
+      'Labour for approved plumbing scope',
+      'Materials and fittings as required',
+      'Clean-up and testing after completion',
+    ],
+    suggestedNotes: [
+      'Final price depends on site access, parts, and approved scope.',
+      urgent
+        ? 'This lead is urgent. Call first before quoting.'
+        : 'Confirm details before sending the quote.',
+      lead.emailSkipped ? 'Email was skipped. Use phone follow-up.' : 'Email quote can be drafted after review.',
+      lead.preferredTime
+        ? "Preferred time noted only. The team must confirm availability."
+        : 'Ask for a preferred booking time before scheduling.',
+    ],
+    suggestedFollowUpTiming: urgent
+      ? 'Call as soon as practical, then send a reviewed quote or next-step message.'
+      : 'Follow up within 1 business day if the customer has not replied.',
+    suggestedQuoteStatus: 'Draft',
+    customerFriendlySummary: `Thanks ${lead.customerName || 'there'}, we have noted your ${jobType} enquiry in ${lead.suburb || 'your area'}. The team will review the details and confirm the next step before any quote or booking is final.`,
+    reviewRequired: true,
+  }
+}
+
+export function generateFollowUpDraft(
+  quoteOrLead: QuoteFormState | ScwLeadDraft,
+): FollowUpDraft {
+  if ('quoteStatus' in quoteOrLead) {
+    const name = quoteOrLead.contactName || quoteOrLead.clientBusinessName || 'there'
+    const project = quoteOrLead.projectTitle || quoteOrLead.projectSummary || 'your quote'
+
+    if (quoteOrLead.quoteStatus === 'sent' || quoteOrLead.quoteStatus === 'follow-up') {
+      return {
+        scenario: 'quote_sent_no_reply',
+        recommendation: 'Quote sent but no reply. Send a soft follow-up after review.',
+        emailDraft: `Hi ${name},\n\nJust checking in on ${project}. No pressure at all - happy to answer questions or adjust the scope if needed.\n\nCheers`,
+        smsOrCallNote: 'Use a short phone follow-up if email is not the best channel.',
+        reviewRequired: true,
+      }
+    }
+
+    return {
+      scenario: 'booking_request_pending',
+      recommendation: 'Confirm quote approval, timing, and deposit details before booking.',
+      emailDraft: `Hi ${name},\n\nThanks for reviewing ${project}. The next step is to confirm timing and payment details. We will confirm availability before locking anything in.\n\nCheers`,
+      smsOrCallNote: 'Do not confirm booking until the tradie approves the timing.',
+      reviewRequired: true,
+    }
+  }
+
+  const lead = quoteOrLead
+  const name = lead.customerName || 'there'
+  const urgent = looksEmergency(`${lead.urgency} ${lead.jobDescription}`)
+
+  return {
+    scenario: urgent ? 'urgent_lead_not_reviewed' : 'lead_review',
+    recommendation: urgent
+      ? 'This lead is urgent. Call first before quoting.'
+      : 'Quote is ready to review.',
+    emailDraft: `Hi ${name},\n\nThanks for your plumbing enquiry. We have your details and the team will review them before confirming the quote or booking.\n\nCheers`,
+    smsOrCallNote: lead.emailSkipped
+      ? 'Email was skipped. Use phone follow-up.'
+      : 'Use email or phone after the lead is reviewed.',
+    reviewRequired: true,
+  }
+}
+
+export function generateInvoiceDraftFromQuote(
+  quote: QuoteFormState,
+  paymentDetails: InvoicePaymentDetails = {},
+): InvoiceDraft {
+  const totals = calculateTotals(quote.lineItems, quote.depositEnabled)
+  const amount = totals.oneOffTotal || totals.subtotal
+  const amountText = formatAud(amount)
+  const hasPayId = Boolean(paymentDetails.payId)
+  const hasBankTransfer = Boolean(
+    paymentDetails.accountName &&
+      paymentDetails.bsb &&
+      paymentDetails.accountNumber,
+  )
+  const instructions = [
+    hasPayId ? `PayID: ${paymentDetails.payId}` : 'PayID: add PayID before sending',
+    hasBankTransfer
+      ? `Bank transfer: ${paymentDetails.accountName}, BSB ${paymentDetails.bsb}, Account ${paymentDetails.accountNumber}`
+      : 'Bank transfer/direct deposit: add account name, BSB, and account number before sending',
+  ]
+
+  return {
+    invoiceNumber: 'INV-XXXX',
+    amount: amountText,
+    paymentInstructions: instructions.join('\n'),
+    pdfInvoiceWording: `Invoice for ${quote.projectTitle || quote.projectSummary || 'approved work'}: ${amountText}. Payment by PayID, bank transfer, or direct deposit. Please review all payment details before sending this PDF invoice.`,
+    dueDate: 'Due on receipt unless otherwise agreed.',
+    reviewBeforeSending: true,
+    missingPaymentDetails: !hasPayId && !hasBankTransfer,
+  }
+}
+
+export function getOperationalSuggestions(input: {
+  lead?: ScwLeadDraft
+  quote?: QuoteFormState
+  invoice?: InvoiceDraft
+  followUpOverdue?: boolean
+}): OperationalSuggestion[] {
+  const suggestions: OperationalSuggestion[] = []
+
+  if (input.lead) {
+    if (!input.lead.phone) {
+      suggestions.push({ type: 'missing_phone', message: 'Missing phone. Ask for the best contact number.' })
+    }
+    if (input.lead.emailSkipped) {
+      suggestions.push({ type: 'invalid_email', message: 'Email was skipped. Use phone follow-up.' })
+    }
+    if (looksEmergency(`${input.lead.urgency} ${input.lead.jobDescription}`)) {
+      suggestions.push({ type: 'urgent_job', message: 'This lead is urgent. Call first before quoting.' })
+    }
+    if (input.lead.quoteDraftStatus !== 'ready') {
+      suggestions.push({ type: 'quote_not_reviewed', message: 'Quote details are not ready for review yet.' })
+    } else {
+      suggestions.push({ type: 'quote_not_reviewed', message: 'Quote is ready to review.' })
+    }
+  }
+
+  if (input.quote) {
+    if (input.quote.quoteStatus !== 'accepted') {
+      suggestions.push({ type: 'quote_not_reviewed', message: 'Quote needs tradie review before sending or invoicing.' })
+    }
+    if (!input.quote.lineItems.some((item) => item.billingType !== 'one-off')) {
+      suggestions.push({ type: 'recurring_revenue', message: 'Check whether hosting, support, maintenance, or aftercare should be added.' })
+    }
+  }
+
+  if (input.invoice?.missingPaymentDetails) {
+    suggestions.push({ type: 'missing_payment_details', message: 'Payment details are missing from invoice.' })
+  }
+
+  if (input.followUpOverdue) {
+    suggestions.push({ type: 'follow_up_overdue', message: 'Follow-up is overdue. Prepare a review-only reminder draft.' })
+  }
+
+  return suggestions
 }

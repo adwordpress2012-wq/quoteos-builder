@@ -6,17 +6,33 @@ type AppHeaderProps = {
   showBuilderNav?: boolean
 }
 
+const COMMAND_PATHS = [
+  '/app/dashboard',
+  '/app/leads',
+  '/app/quotes',
+  '/app/bookings',
+  '/app/invoices',
+  '/app/follow-ups',
+  '/app/customers',
+  '/app/micah',
+  '/app/settings',
+  '/app/builder',
+]
+
 export function AppHeader({ showBuilderNav = true }: AppHeaderProps) {
   const location = useLocation()
   const onDashboard =
-    location.pathname === '/app' || location.pathname === '/app/dashboard'
+    location.pathname === '/app/dashboard' || location.pathname === '/app'
+  const inCommandCentre = COMMAND_PATHS.some((p) =>
+    location.pathname.startsWith(p),
+  )
 
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--qos-border)] bg-[var(--qos-bg)]/90 shadow-[inset_0_-1px_0_rgba(59,130,246,0.08)] backdrop-blur-xl print:hidden">
       <div className="mx-auto flex h-14 max-w-[1600px] flex-wrap items-center justify-between gap-3 px-4 sm:h-16 sm:px-6">
         <div className="flex min-w-0 items-center gap-3 sm:gap-4">
           <Link
-            to="/app/builder"
+            to="/app/dashboard"
             className="group flex shrink-0 items-center gap-2.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-400"
           >
             <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-blue-500/40 bg-gradient-to-br from-blue-600/30 to-purple-500/20 text-sm font-bold text-cyan-200 shadow-[var(--qos-glow-blue)]">
@@ -27,19 +43,19 @@ export function AppHeader({ showBuilderNav = true }: AppHeaderProps) {
                 QuoteOS SQBA
               </span>
               <span className="text-[10px] text-slate-500 sm:text-[11px]">
-                Smart Quote Builder Assistant
+                Tradie Command Centre
               </span>
             </div>
           </Link>
         </div>
 
-        {showBuilderNav ? (
+        {showBuilderNav && inCommandCentre ? (
           <nav
             className="order-3 flex w-full justify-center gap-1 sm:order-none sm:w-auto"
             aria-label="App navigation"
           >
             <Link
-              to="/app"
+              to="/app/dashboard"
               className={cn(
                 'rounded-full px-4 py-1.5 text-xs font-medium transition-colors sm:text-sm',
                 onDashboard
@@ -49,6 +65,20 @@ export function AppHeader({ showBuilderNav = true }: AppHeaderProps) {
               aria-current={onDashboard ? 'page' : undefined}
             >
               Dashboard
+            </Link>
+            <Link
+              to="/app/builder"
+              className={cn(
+                'rounded-full px-4 py-1.5 text-xs font-medium transition-colors sm:text-sm',
+                location.pathname === '/app/builder'
+                  ? 'border border-blue-500/40 bg-blue-500/15 text-cyan-200'
+                  : 'text-slate-400 hover:bg-white/[0.04] hover:text-cyan-200',
+              )}
+              aria-current={
+                location.pathname === '/app/builder' ? 'page' : undefined
+              }
+            >
+              Builder
             </Link>
           </nav>
         ) : null}
