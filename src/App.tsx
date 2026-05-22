@@ -12,25 +12,28 @@ import { MicahPage } from './pages/command/MicahPage'
 import { DosCalendarPage } from './pages/command/DosCalendarPage'
 import { ToolsPage } from './pages/command/ToolsPage'
 import { SettingsPage } from './pages/command/SettingsPage'
+import { DemoStoreProvider } from './hooks/useDemoStore'
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/app" element={<Navigate to="/app/dashboard" replace />} />
-      <Route path="/app/dashboard" element={<DashboardPage />} />
-      <Route path="/app/leads" element={<LeadsPage />} />
-      <Route path="/app/quotes" element={<QuotesListPage />} />
-      <Route path="/app/builder" element={<QuoteBuilderPage />} />
-      <Route path="/app/bookings" element={<BookingsPage />} />
-      <Route path="/app/invoices" element={<InvoicesPage />} />
-      <Route path="/app/follow-ups" element={<FollowUpsPage />} />
-      <Route path="/app/customers" element={<CustomersPage />} />
-      <Route path="/app/micah" element={<MicahPage />} />
-      <Route path="/app/calendar" element={<DosCalendarPage />} />
-      <Route path="/app/tools" element={<ToolsPage />} />
-      <Route path="/app/settings" element={<SettingsPage />} />
-    </Routes>
+    <DemoStoreProvider>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/app" element={<Navigate to="/app/dashboard" replace />} />
+        <Route path="/app/dashboard" element={<DashboardPage />} />
+        <Route path="/app/leads" element={<LeadsPage />} />
+        <Route path="/app/quotes" element={<QuotesListPage />} />
+        <Route path="/app/builder" element={<QuoteBuilderPage />} />
+        <Route path="/app/bookings" element={<BookingsPage />} />
+        <Route path="/app/invoices" element={<InvoicesPage />} />
+        <Route path="/app/follow-ups" element={<FollowUpsPage />} />
+        <Route path="/app/customers" element={<CustomersPage />} />
+        <Route path="/app/micah" element={<MicahPage />} />
+        <Route path="/app/calendar" element={<DosCalendarPage />} />
+        <Route path="/app/tools" element={<ToolsPage />} />
+        <Route path="/app/settings" element={<SettingsPage />} />
+      </Routes>
+    </DemoStoreProvider>
   )
 }
 

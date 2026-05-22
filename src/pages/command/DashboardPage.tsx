@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Briefcase,
@@ -7,13 +8,19 @@ import {
   TrendingUp,
 } from 'lucide-react'
 import { ActivityTimeline } from '../../components/command/dashboard/ActivityTimeline'
+import { MicahScwIntakePanel } from '../../components/command/dashboard/MicahScwIntakePanel'
 import { MicahSuggestionsPanel } from '../../components/command/dashboard/MicahSuggestionsPanel'
 import { MorningBriefing } from '../../components/command/dashboard/MorningBriefing'
 import { QuickActionsRow } from '../../components/command/dashboard/QuickActionsRow'
+import {
+  ExpenseFormDrawer,
+  expenseFormToDemo,
+  InvoiceFormDrawer,
+} from '../../components/command/forms/CommandForms'
 import { CommandCentreLayout } from '../../components/command/CommandCentreLayout'
 import { StatCard } from '../../components/command/StatCard'
+import { useDemoStore } from '../../hooks/useDemoStore'
 import {
-  DASHBOARD_KPIS,
   DEMO_BUSINESS,
   formatDemoMoney,
   TODAYS_ATTENTION,
@@ -21,7 +28,10 @@ import {
 import { cn } from '../../lib/utils'
 
 export function DashboardPage() {
-  const kpis = DASHBOARD_KPIS
+  const { addExpense, createInvoice, dashboardKpis } = useDemoStore()
+  const kpis = dashboardKpis
+  const [expenseOpen, setExpenseOpen] = useState(false)
+  const [invoiceOpen, setInvoiceOpen] = useState(false)
 
   return (
     <CommandCentreLayout
@@ -30,13 +40,15 @@ export function DashboardPage() {
     >
       <div className="space-y-6">
         <MorningBriefing />
-        <QuickActionsRow />
+        <QuickActionsRow
+          onAddExpense={() => setExpenseOpen(true)}
+          onCreateInvoice={() => setInvoiceOpen(true)}
+        />
+
+        <MicahScwIntakePanel />
 
         <section aria-labelledby="dashboard-kpis-heading">
-          <h2
-            id="dashboard-kpis-heading"
-            className="sr-only"
-          >
+          <h2 id="dashboard-kpis-heading" className="sr-only">
             Dashboard metrics
           </h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
@@ -111,6 +123,25 @@ export function DashboardPage() {
           </div>
         </div>
       </div>
+
+      <ExpenseFormDrawer
+        open={expenseOpen}
+        onClose={() => setExpenseOpen(false)}
+        onSave={(values) => addExpense(expenseFormToDemo(values))}
+      />
+
+      <InvoiceFormDrawer
+        open={invoiceOpen}
+        onClose={() => setInvoiceOpen(false)}
+        onSave={(values) =>
+          createInvoice({
+            customer: values.customer,
+            linkedQuoteId: values.linkedQuoteId,
+            amount: parseFloat(values.amount) || 0,
+            dueDate: values.dueDate,
+          })
+        }
+      />
     </CommandCentreLayout>
   )
 }

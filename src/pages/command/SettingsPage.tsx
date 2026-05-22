@@ -29,12 +29,27 @@ export function SettingsPage() {
             value={settings.businessName}
             onChange={(v) => updateSetting('businessName', v)}
           />
-          <div>
-            <span className={builderLabelClass}>Logo</span>
-            <div className="flex min-h-[80px] items-center justify-center rounded-xl border border-dashed border-blue-500/30 bg-white/[0.02] text-sm text-slate-500">
-              Logo upload — coming soon
+          <Field
+            label="Logo URL"
+            value={settings.logoUrl}
+            onChange={(v) => updateSetting('logoUrl', v)}
+            placeholder="https://yoursite.com.au/logo.png"
+          />
+          {settings.logoUrl ? (
+            <div className="flex items-center gap-4 rounded-xl border border-blue-500/20 bg-white/[0.02] p-3">
+              <img
+                src={settings.logoUrl}
+                alt=""
+                className="h-12 max-w-[160px] object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none'
+                }}
+              />
+              <p className="text-xs text-slate-500">
+                Preview — used on quotes and invoices when configured.
+              </p>
             </div>
-          </div>
+          ) : null}
           <Field
             label="Website URL"
             value={settings.websiteUrl}
@@ -102,9 +117,14 @@ export function SettingsPage() {
             </p>
           </div>
           <Field
-            label="Calendly / calendar link"
+            label="Calendly link (optional)"
             value={settings.calendlyUrl}
             onChange={(v) => updateSetting('calendlyUrl', v)}
+          />
+          <Field
+            label="Google Calendar link (optional)"
+            value={settings.googleCalendarUrl}
+            onChange={(v) => updateSetting('googleCalendarUrl', v)}
           />
         </fieldset>
 
@@ -153,11 +173,13 @@ function Field({
   value,
   onChange,
   type = 'text',
+  placeholder,
 }: {
   label: string
   value: string
   onChange: (v: string) => void
   type?: string
+  placeholder?: string
 }) {
   return (
     <div>
@@ -166,6 +188,7 @@ function Field({
         type={type}
         className={builderInputClass}
         value={value}
+        placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
       />
     </div>

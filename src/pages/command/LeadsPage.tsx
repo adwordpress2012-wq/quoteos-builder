@@ -1,27 +1,37 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { CommandCentreLayout } from '../../components/command/CommandCentreLayout'
+import { AddEntityButton } from '../../components/command/AddEntityButton'
+import { LeadFormDrawer } from '../../components/command/forms/CommandForms'
 import { ActionBtn, PageActions } from '../../components/command/PageActions'
 import { StatusBadge } from '../../components/command/StatusBadge'
-import { DEMO_LEADS } from '../../lib/demo/demo-data'
-import type { DemoLead, LeadStatus } from '../../lib/demo/types'
+import { useDemoStore } from '../../hooks/useDemoStore'
+import type { LeadStatus } from '../../lib/demo/types'
 
 export function LeadsPage() {
-  const [leads, setLeads] = useState<DemoLead[]>(DEMO_LEADS)
+  const { leads, addLead, updateLead } = useDemoStore()
+  const [addOpen, setAddOpen] = useState(false)
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  useEffect(() => {
+    const state = location.state as { openAdd?: boolean } | null
+    const shouldOpen = state?.openAdd || new URLSearchParams(location.search).get('action') === 'add'
+    if (shouldOpen) {
+      setAddOpen(true)
+      navigate(location.pathname, { replace: true, state: {} })
+    }
+  }, [location, navigate])
 
   const markReviewed = (id: string) => {
-    setLeads((prev) =>
-      prev.map((l) =>
-        l.id === id && l.status === 'new'
-          ? { ...l, status: 'reviewed' as LeadStatus }
-          : l,
-      ),
-    )
+    updateLead(id, { status: 'reviewed' as LeadStatus })
   }
 
   return (
     <CommandCentreLayout
       title="Leads"
       subtitle="Website chat enquiries from Micah SCW"
+      actions={<AddEntityButton label="Add lead" onClick={() => setAddOpen(true)} />}
     >
       <ul className="space-y-4">
         {leads.map((lead) => (
@@ -48,6 +58,12 @@ export function LeadsPage() {
                 <dt className="text-slate-500">Email</dt>
                 <dd className="text-slate-200">{lead.email}</dd>
               </div>
+              {lead.address ? (
+                <div className="sm:col-span-2">
+                  <dt className="text-slate-500">Address</dt>
+                  <dd className="text-slate-200">{lead.address}</dd>
+                </div>
+              ) : null}
               <div className="sm:col-span-2">
                 <dt className="text-slate-500">Notes</dt>
                 <dd className="text-slate-300">{lead.notes}</dd>
@@ -73,6 +89,12 @@ export function LeadsPage() {
           </li>
         ))}
       </ul>
+
+      <LeadFormDrawer
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        onSave={(values) => addLead(values)}
+      />
     </CommandCentreLayout>
   )
 }

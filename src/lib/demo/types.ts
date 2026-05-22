@@ -4,9 +4,11 @@ export type LeadStatus = 'new' | 'reviewed' | 'quote-drafted'
 
 export type DemoLead = {
   id: string
+  customerId?: string
   name: string
   phone: string
   email: string
+  address: string
   suburb: string
   jobType: string
   urgency: 'urgent' | 'normal' | 'flexible'
@@ -32,9 +34,13 @@ export type BookingStatus = 'requested' | 'confirmed' | 'completed'
 export type DemoBooking = {
   id: string
   requestedAt: string
+  endsAt?: string
   customer: string
+  address: string
   jobType: string
   suburb: string
+  notes: string
+  linkedQuoteNumber: string
   status: BookingStatus
 }
 
@@ -67,11 +73,22 @@ export type DemoCustomer = {
   name: string
   mobile: string
   email: string
+  address: string
   suburb: string
   preferredContact: 'phone' | 'email' | 'sms'
+  notes: string
   jobHistory: string[]
   quoteHistory: string[]
   invoiceHistory: string[]
+}
+
+export type DemoExpense = {
+  id: string
+  date: string
+  supplier: string
+  category: string
+  description: string
+  amount: number
 }
 
 export type AttentionItem = {
@@ -132,7 +149,12 @@ export type MicahDashboardReminder = {
   href: string
 }
 
-export type CalendarEventKind = 'job' | 'booking' | 'admin' | 'site-visit'
+export type CalendarEventKind =
+  | 'quote_visit'
+  | 'job_booking'
+  | 'invoice_reminder'
+  | 'admin'
+  | 'expense_reminder'
 
 export type DemoCalendarEvent = {
   id: string

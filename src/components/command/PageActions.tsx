@@ -22,6 +22,7 @@ type ActionBtnProps = {
   to?: string
   variant?: 'primary' | 'secondary' | 'ghost'
   className?: string
+  type?: 'button' | 'submit'
 }
 
 export function ActionBtn({
@@ -31,6 +32,7 @@ export function ActionBtn({
   to,
   variant = 'secondary',
   className,
+  type = 'button',
 }: ActionBtnProps) {
   const base =
     'inline-flex min-h-[48px] flex-1 items-center justify-center rounded-xl px-4 text-sm font-semibold transition-colors sm:flex-none sm:min-w-[140px]'
@@ -62,7 +64,7 @@ export function ActionBtn({
   }
 
   return (
-    <button type="button" onClick={onClick} className={cls}>
+    <button type={type} onClick={onClick} className={cls}>
       {children}
     </button>
   )

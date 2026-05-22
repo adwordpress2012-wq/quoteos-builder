@@ -4,6 +4,7 @@ export type ThemeMode = 'dark' | 'light'
 
 export type TradieSettings = {
   businessName: string
+  logoUrl: string
   websiteUrl: string
   businessEmail: string
   phone: string
@@ -14,12 +15,14 @@ export type TradieSettings = {
   defaultQuoteTerms: string
   defaultInvoiceNotes: string
   calendlyUrl: string
+  googleCalendarUrl: string
 }
 
 const STORAGE_KEY = 'quoteos-tradie-settings'
 
 export const DEFAULT_TRADIE_SETTINGS: TradieSettings = {
   businessName: 'Luke Plumbing',
+  logoUrl: '',
   websiteUrl: 'https://lukeplumbing.com.au',
   businessEmail: 'luke@lukeplumbing.com.au',
   phone: '0412 345 678',
@@ -31,6 +34,7 @@ export const DEFAULT_TRADIE_SETTINGS: TradieSettings = {
     '50% deposit to book. Balance due on completion. Quote valid 14 days.',
   defaultInvoiceNotes: 'Thank you for your business. PayID preferred.',
   calendlyUrl: 'https://calendly.com/',
+  googleCalendarUrl: 'https://calendar.google.com',
 }
 
 function loadSettings(): TradieSettings {

@@ -1,11 +1,14 @@
 import { CommandCentreLayout } from '../../components/command/CommandCentreLayout'
 import { ActionBtn, PageActions } from '../../components/command/PageActions'
 import { StatusBadge } from '../../components/command/StatusBadge'
-import { DEMO_QUOTES, formatDemoMoney } from '../../lib/demo/demo-data'
+import { formatDemoMoney } from '../../lib/demo/demo-data'
+import { useDemoStore } from '../../hooks/useDemoStore'
 
 const STAGES = ['draft', 'sent', 'follow-up', 'accepted', 'lost'] as const
 
 export function QuotesListPage() {
+  const { quotes } = useDemoStore()
+
   return (
     <CommandCentreLayout
       title="Quotes"
@@ -13,7 +16,7 @@ export function QuotesListPage() {
     >
       <div className="mb-6 flex flex-wrap gap-2">
         {STAGES.map((stage) => {
-          const count = DEMO_QUOTES.filter((q) => q.status === stage).length
+          const count = quotes.filter((q) => q.status === stage).length
           return (
             <span
               key={stage}
@@ -27,7 +30,7 @@ export function QuotesListPage() {
       </div>
 
       <ul className="space-y-4">
-        {DEMO_QUOTES.map((quote) => (
+        {quotes.map((quote) => (
           <li key={quote.id} className="glass-card rounded-xl p-4 sm:p-5">
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div>
@@ -54,9 +57,9 @@ export function QuotesListPage() {
               <ActionBtn to="/app/builder" variant="primary">
                 Review Quote
               </ActionBtn>
-              <ActionBtn to="/app/builder">Open Proposal</ActionBtn>
+              <ActionBtn to={`/app/builder?quoteId=${quote.id}`}>Open Proposal</ActionBtn>
               <ActionBtn to="/app/follow-ups">Draft Follow-Up</ActionBtn>
-              <ActionBtn to="/app/invoices" variant="ghost">
+              <ActionBtn to={`/app/invoices?action=create&quoteId=${quote.id}`} variant="ghost">
                 Create Invoice
               </ActionBtn>
             </PageActions>
