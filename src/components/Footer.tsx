@@ -12,7 +12,7 @@ export function Footer() {
       <div className="mx-auto max-w-6xl px-5 py-12 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <QuoteOsLogo />
+            <QuoteOsLogo size="md" />
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-[#64748b]">
               AI quoting and booking assistant for plumbers and tradies across
               Australia.

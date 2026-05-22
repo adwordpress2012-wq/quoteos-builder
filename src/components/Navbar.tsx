@@ -9,17 +9,17 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-[#e2e8f0] bg-white/95 shadow-sm backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5 sm:h-[4.25rem] sm:px-6 lg:px-8">
+      <div className="mx-auto flex min-h-[4.5rem] max-w-6xl items-center justify-between gap-3 px-4 py-2 sm:min-h-[5rem] sm:gap-4 sm:px-6 lg:px-8">
         <a
           href="#top"
-          className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#2563eb]"
+          className="flex shrink-0 items-center py-1 pr-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#2563eb]"
           onClick={() => setOpen(false)}
         >
-          <QuoteOsLogo />
+          <QuoteOsLogo size="lg" />
         </a>
 
         <nav
-          className="hidden items-center gap-6 md:flex"
+          className="hidden items-center gap-5 md:flex"
           aria-label="Main navigation"
         >
           {navLinks.map((link) => (
