@@ -30,9 +30,7 @@ function inferBusinessType(prompt: string): BusinessTypeId {
   if (/paint|coats|prep/i.test(lower)) return 'painter'
   if (/fenc|colorbond|gate/i.test(lower)) return 'fencing'
   if (/landscap|turf|garden/i.test(lower)) return 'landscaping'
-  if (/dos|micah|scw|smart chat|agentmate|hosting|website rebuild/i.test(lower))
-    return 'dos-client'
-  if (/website|agency|seo/i.test(lower)) return 'agency'
+  if (/build|renovation|extension|deck/i.test(lower)) return 'agency'
   return 'plumber'
 }
 
@@ -48,7 +46,6 @@ function inferQuoteOptionId(
   }
 
   if (businessTypeId === 'plumber') {
-    if (/website|scw|chat widget/i.test(lower)) return 'plumber-website-scw'
     if (/hot water/i.test(lower)) return 'plumber-hot-water'
     if (/pipe|leak|repair/i.test(lower)) return 'plumber-pipe-repair'
     if (/emergency|callout|urgent/i.test(lower)) return 'plumber-emergency'
@@ -58,17 +55,6 @@ function inferQuoteOptionId(
   if (businessTypeId === 'electrician') {
     if (/switchboard/i.test(lower)) return 'electrician-switchboard'
     return 'electrician-custom'
-  }
-
-  if (businessTypeId === 'dos-client') {
-    if (/rebuild/i.test(lower)) return 'dos-rebuild'
-    if (/new website|new site/i.test(lower)) return 'dos-new-site'
-    if (/micah|sba/i.test(lower)) return 'dos-micah-sba'
-    if (/scw|chat widget/i.test(lower)) return 'dos-scw'
-    if (/google business/i.test(lower)) return 'dos-google'
-    if (/hosting|support/i.test(lower)) return 'dos-hosting'
-    if (/agentmate/i.test(lower)) return 'dos-agentmate'
-    return 'dos-custom'
   }
 
   return getDefaultQuoteOptionId(businessTypeId)
@@ -88,7 +74,7 @@ export function parseMicahPrompt(prompt: string): GenerateQuoteResult {
   const projectSummary =
     trimmed ||
     option?.summaryHint ||
-    `${businessLabel} quote prepared with Micah SQBA.`
+    `${businessLabel} quote — review line items and pricing before sending.`
 
   const projectTitle =
     option?.label ??

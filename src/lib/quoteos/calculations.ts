@@ -7,7 +7,14 @@ export function calculateTotals(
 ): QuoteTotals {
   const oneOffTotal = lineItems
     .filter((i) => i.billingType === 'one-off')
-    .reduce((sum, i) => sum + (Number.isFinite(i.amount) ? i.amount : 0), 0)
+    .reduce((sum, i) => {
+      const quantity =
+        typeof i.quantity === 'number' && Number.isFinite(i.quantity)
+          ? i.quantity
+          : 1
+      const unitPrice = Number.isFinite(i.amount) ? i.amount : 0
+      return sum + quantity * unitPrice
+    }, 0)
 
   const monthlyRecurringTotal = lineItems
     .filter((i) => i.billingType === 'monthly')
@@ -46,12 +53,11 @@ export function formatAud(amount: number): string {
 
 export function getQuoteDisplayTitle(state: QuoteFormState): string {
   if (state.projectTitle.trim()) return state.projectTitle.trim()
+  if (state.projectSummary.trim()) return state.projectSummary.trim()
   const option = QUOTE_TYPE_OPTIONS.find((item) => item.id === state.quoteTypeId)
   if (option) return option.label
   const type = state.quoteTypeId
-  if (type === 'custom') return 'Custom Quote'
-  return type
-    .split('-')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ')
+  if (type === 'custom') return 'Custom quote'
+  if (type === 'general_trade') return 'General trade quote'
+  return type.charAt(0).toUpperCase() + type.slice(1) + ' quote'
 }

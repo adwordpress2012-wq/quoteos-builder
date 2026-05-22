@@ -1,27 +1,27 @@
 import { Link, useLocation } from 'react-router-dom'
 import {
-  Bot,
   Calendar,
+  CalendarDays,
   FileText,
   LayoutDashboard,
+  LayoutGrid,
   Plus,
   Receipt,
   Settings,
   UserCircle,
   UserPlus,
-  Bell,
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 
 const NAV_ITEMS = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/app/dashboard' },
   { icon: UserPlus, label: 'Leads', href: '/app/leads' },
+  { icon: UserCircle, label: 'Customers', href: '/app/customers' },
   { icon: FileText, label: 'Quotes', href: '/app/quotes' },
   { icon: Calendar, label: 'Bookings', href: '/app/bookings' },
   { icon: Receipt, label: 'Invoices', href: '/app/invoices' },
-  { icon: Bell, label: 'Follow-Ups', href: '/app/follow-ups', badge: 4 },
-  { icon: UserCircle, label: 'Customers', href: '/app/customers' },
-  { icon: Bot, label: 'Micah', href: '/app/micah' },
+  { icon: CalendarDays, label: 'DOS Calendar', href: '/app/calendar' },
+  { icon: LayoutGrid, label: 'Tools', href: '/app/tools' },
   { icon: Settings, label: 'Settings', href: '/app/settings' },
 ] as const
 
@@ -79,11 +79,6 @@ export function CommandCentreSidebar({
                   aria-hidden="true"
                 />
                 <span className="flex-1 text-left">{item.label}</span>
-                {'badge' in item && item.badge != null ? (
-                  <span className="rounded-full bg-purple-500/25 px-2 py-0.5 text-[10px] font-bold text-purple-200">
-                    {item.badge}
-                  </span>
-                ) : null}
               </Link>
             )
           })}

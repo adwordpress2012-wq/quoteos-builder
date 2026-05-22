@@ -22,33 +22,27 @@ export const BUSINESS_TYPE_OPTIONS: { id: BusinessTypeId; label: string }[] = [
 export const QUOTE_TYPES_BY_BUSINESS: Record<BusinessTypeId, SqbaQuoteOption[]> = {
   plumber: [
     {
-      id: 'plumber-website-scw',
-      label: 'Website + SCW Package',
-      presetId: 'dos-website-growth',
-      summaryHint: 'One-page plumbing website with Smart Chat Widget (SCW).',
-    },
-    {
       id: 'plumber-hot-water',
       label: 'Hot Water System',
-      presetId: 'plumber-job',
+      presetId: 'plumbing',
       summaryHint: 'Hot water system replacement — supply, install and commissioning.',
     },
     {
       id: 'plumber-pipe-repair',
       label: 'Pipe Repair',
-      presetId: 'plumber-job',
+      presetId: 'plumbing',
       summaryHint: 'Pipe repair job — diagnosis, repair and materials.',
     },
     {
       id: 'plumber-bathroom',
       label: 'Bathroom Plumbing',
-      presetId: 'plumber-job',
+      presetId: 'plumbing',
       summaryHint: 'Bathroom plumbing — fixtures, rough-in and fit-off as scoped.',
     },
     {
       id: 'plumber-emergency',
       label: 'Emergency Callout',
-      presetId: 'plumber-job',
+      presetId: 'plumbing',
       summaryHint: 'Emergency plumbing callout — priority attendance and repair.',
     },
     {
@@ -61,31 +55,31 @@ export const QUOTE_TYPES_BY_BUSINESS: Record<BusinessTypeId, SqbaQuoteOption[]> 
     {
       id: 'electrician-switchboard',
       label: 'Switchboard Job',
-      presetId: 'electrician-job',
+      presetId: 'electrical',
       summaryHint: 'Switchboard inspection and upgrade as scoped.',
     },
     {
       id: 'electrician-power-points',
       label: 'Power Points',
-      presetId: 'electrician-job',
+      presetId: 'electrical',
       summaryHint: 'Power point installation as scoped.',
     },
     {
       id: 'electrician-lighting',
       label: 'Lighting',
-      presetId: 'electrician-job',
+      presetId: 'electrical',
       summaryHint: 'Lighting installation and testing.',
     },
     {
       id: 'electrician-safety-check',
       label: 'Safety Check',
-      presetId: 'electrician-job',
+      presetId: 'electrical',
       summaryHint: 'Electrical safety inspection and report.',
     },
     {
       id: 'electrician-emergency',
       label: 'Emergency Callout',
-      presetId: 'electrician-job',
+      presetId: 'electrical',
       summaryHint: 'Emergency electrical callout — priority attendance.',
     },
     {
@@ -98,17 +92,17 @@ export const QUOTE_TYPES_BY_BUSINESS: Record<BusinessTypeId, SqbaQuoteOption[]> 
     {
       id: 'painter-interior',
       label: 'Interior Painting',
-      presetId: 'painter-job',
+      presetId: 'painting',
     },
     {
       id: 'painter-exterior',
       label: 'Exterior Painting',
-      presetId: 'painter-job',
+      presetId: 'painting',
     },
     {
       id: 'painter-prep',
       label: 'Prep & Repair',
-      presetId: 'painter-job',
+      presetId: 'painting',
     },
     {
       id: 'painter-custom',
@@ -120,12 +114,12 @@ export const QUOTE_TYPES_BY_BUSINESS: Record<BusinessTypeId, SqbaQuoteOption[]> 
     {
       id: 'fencing-install',
       label: 'Fencing Installation',
-      presetId: 'fencing-job',
+      presetId: 'general_trade',
     },
     {
       id: 'fencing-gate',
       label: 'Gate Install',
-      presetId: 'fencing-job',
+      presetId: 'general_trade',
     },
     {
       id: 'fencing-custom',
@@ -137,12 +131,12 @@ export const QUOTE_TYPES_BY_BUSINESS: Record<BusinessTypeId, SqbaQuoteOption[]> 
     {
       id: 'landscaping-garden',
       label: 'Garden / Turf Job',
-      presetId: 'landscaping-job',
+      presetId: 'general_trade',
     },
     {
       id: 'landscaping-cleanup',
       label: 'Clean-up & Mulch',
-      presetId: 'landscaping-job',
+      presetId: 'general_trade',
     },
     {
       id: 'landscaping-custom',
@@ -152,9 +146,9 @@ export const QUOTE_TYPES_BY_BUSINESS: Record<BusinessTypeId, SqbaQuoteOption[]> 
   ],
   agency: [
     {
-      id: 'agency-website',
-      label: 'Website Build',
-      presetId: 'dos-website-growth',
+      id: 'agency-build',
+      label: 'Building / renovation',
+      presetId: 'building',
     },
     {
       id: 'agency-custom',
@@ -163,22 +157,16 @@ export const QUOTE_TYPES_BY_BUSINESS: Record<BusinessTypeId, SqbaQuoteOption[]> 
     },
   ],
   'dos-client': [
-    { id: 'dos-website-starter', label: 'Website Starter', presetId: 'dos-website-starter' },
-    { id: 'dos-website-growth', label: 'Website Growth', presetId: 'dos-website-growth' },
-    { id: 'dos-website-premium', label: 'Website Premium', presetId: 'dos-website-premium' },
-    { id: 'dos-website-custom', label: 'Custom Website', presetId: 'dos-website-custom' },
-    { id: 'dos-rebuild', label: 'Website Rebuild', presetId: 'dos-website-rebuild' },
-    { id: 'dos-new-site', label: 'New Website Build', presetId: 'new-website-build' },
-    { id: 'dos-micah-sba', label: 'Micah SBA', presetId: 'micah-sba' },
-    { id: 'dos-scw', label: 'Smart Chat Widget', presetId: 'smart-chat-widget' },
     {
-      id: 'dos-google',
-      label: 'Google Business Setup',
-      presetId: 'google-business-setup',
+      id: 'dos-general',
+      label: 'General trade job',
+      presetId: 'general_trade',
     },
-    { id: 'dos-hosting', label: 'Hosting & Support', presetId: 'hosting-support' },
-    { id: 'dos-agentmate', label: 'AgentMate Setup', presetId: 'agentmate-setup' },
-    { id: 'dos-custom', label: 'Custom DOS Quote', presetId: 'custom' },
+    {
+      id: 'dos-custom',
+      label: 'Custom quote',
+      presetId: 'custom',
+    },
   ],
 }
 
@@ -191,12 +179,6 @@ export const QUICK_START_EXAMPLES: {
   businessTypeId: BusinessTypeId
   quoteOptionId: string
 }[] = [
-  {
-    label: 'One-page plumbing website + SCW',
-    prompt: 'One-page plumbing website with Smart Chat Widget for Luke Plumbing',
-    businessTypeId: 'plumber',
-    quoteOptionId: 'plumber-website-scw',
-  },
   {
     label: 'Hot water system replacement',
     prompt: 'Hot water system replacement for residential property',

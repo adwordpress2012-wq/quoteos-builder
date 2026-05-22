@@ -187,9 +187,6 @@ export function getMicahContextualTip(
   if (!validation.canSend) {
     return 'Pricing missing — please set price.'
   }
-  if (quote.quoteTypeId === 'dos-website-growth') {
-    return 'Growth package has $1,990 setup + $49/month.'
-  }
   if (quote.quoteGenerated && quote.quoteStatus === 'draft') {
     return 'This quote is ready to send.'
   }

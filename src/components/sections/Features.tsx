@@ -1,6 +1,6 @@
 import {
   Bell,
-  CreditCard,
+  Banknote,
   FileText,
   Mail,
   PenLine,
@@ -53,11 +53,10 @@ const features: Feature[] = [
     iconVariant: 'purple',
   },
   {
-    icon: CreditCard,
-    title: 'Stripe Deposits',
+    icon: Banknote,
+    title: 'Manual Payment Details',
     description:
-      'Secure deposit collection built into your quote flow — lock in commitment before you mobilise.',
-    badge: 'Coming soon',
+      'Add PayID, BSB and account details, with the quote number ready as the payment reference.',
     iconVariant: 'blue',
   },
 ]

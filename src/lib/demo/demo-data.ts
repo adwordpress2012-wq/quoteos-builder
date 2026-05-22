@@ -1,12 +1,18 @@
 import type {
   AttentionItem,
+  CalendarEventKind,
+  DashboardKpiStats,
   DashboardStats,
   DemoBooking,
+  DemoCalendarEvent,
   DemoCustomer,
   DemoFollowUp,
   DemoInvoice,
   DemoLead,
   DemoQuoteRecord,
+  MorningBriefingStats,
+  MicahDashboardReminder,
+  RecentActivityItem,
 } from './types'
 
 export const DEMO_BUSINESS = {
@@ -110,6 +116,55 @@ export const DEMO_QUOTES: DemoQuoteRecord[] = [
     lastAction: 'Went with another tradie',
     nextStep: 'Archive — no action',
     suburb: 'Coorparoo',
+  },
+]
+
+export const DEMO_CALENDAR_EVENTS: DemoCalendarEvent[] = [
+  {
+    id: 'cal-1',
+    startsAt: '2026-05-22T08:00:00',
+    endsAt: '2026-05-22T09:00:00',
+    title: 'Team stand-up',
+    kind: 'admin',
+    notes: 'DOS internal — jobs & invoices for the week',
+  },
+  {
+    id: 'cal-2',
+    startsAt: '2026-05-22T10:00:00',
+    endsAt: '2026-05-22T12:00:00',
+    title: 'Gas bayonet install',
+    customer: 'Lisa Park',
+    suburb: 'Windsor',
+    kind: 'job',
+    notes: 'Confirmed booking — materials on ute',
+  },
+  {
+    id: 'cal-3',
+    startsAt: '2026-05-22T14:00:00',
+    endsAt: '2026-05-22T16:30:00',
+    title: 'Hot water install',
+    customer: 'James Chen',
+    suburb: 'New Farm',
+    kind: 'job',
+    notes: 'Booking request confirmed via SQBA',
+  },
+  {
+    id: 'cal-4',
+    startsAt: '2026-05-23T09:00:00',
+    endsAt: '2026-05-23T10:00:00',
+    title: 'Site measure — bathroom reno',
+    customer: 'Mark Thompson',
+    suburb: 'Ascot',
+    kind: 'site-visit',
+    notes: 'Rough-in scope check before revised quote',
+  },
+  {
+    id: 'cal-5',
+    startsAt: '2026-05-23T13:00:00',
+    endsAt: '2026-05-23T13:30:00',
+    title: 'Follow-up block',
+    kind: 'admin',
+    notes: 'Quotes & overdue invoices',
   },
 ]
 
@@ -255,6 +310,89 @@ export const DASHBOARD_STATS: DashboardStats = {
   revenueYear: 128400,
 }
 
+/** Command Centre dashboard — demo operational snapshot (not live analytics). */
+export const MORNING_BRIEFING: MorningBriefingStats = {
+  jobsToday: 2,
+  revenueWeek: DASHBOARD_STATS.revenueWeek,
+  outstandingInvoices: DASHBOARD_STATS.unpaidInvoices,
+  urgentLeads: DEMO_LEADS.filter((l) => l.urgency === 'urgent').length,
+  upcomingBookings: DEMO_BOOKINGS.filter((b) => b.status !== 'completed').length,
+}
+
+export const DASHBOARD_KPIS: DashboardKpiStats = {
+  weeklyRevenue: DASHBOARD_STATS.revenueWeek,
+  monthlyRevenue: DASHBOARD_STATS.revenueMonth,
+  outstandingPayments: DEMO_INVOICES.filter(
+    (i) => i.status === 'sent' || i.status === 'overdue',
+  ).reduce((sum, i) => sum + i.amount, 0),
+  jobsCompleted: 12,
+  averageJobValue: 1240,
+}
+
+/** Recent activity feed — one item per event type (demo). */
+export const RECENT_ACTIVITY: RecentActivityItem[] = [
+  {
+    id: 'act-1',
+    type: 'lead-added',
+    title: 'Lead added',
+    description: 'Sarah Mitchell — blocked drain · Paddington',
+    timeLabel: 'Today · 8:15 am',
+    href: '/app/leads',
+  },
+  {
+    id: 'act-2',
+    type: 'booking-created',
+    title: 'Booking created',
+    description: 'Lisa Park — gas bayonet install · Windsor',
+    timeLabel: 'Today · 10:00 am',
+    href: '/app/bookings',
+  },
+  {
+    id: 'act-3',
+    type: 'invoice-paid',
+    title: 'Invoice paid',
+    description: 'Tom Reid — LP-2026-013 · $385',
+    timeLabel: 'Yesterday',
+    href: '/app/invoices',
+  },
+  {
+    id: 'act-4',
+    type: 'quote-sent',
+    title: 'Quote sent',
+    description: 'James Chen — hot water system · $2,850',
+    timeLabel: '2 days ago',
+    href: '/app/quotes',
+  },
+]
+
+/** Dashboard-only Micah reminders (no chat UI). */
+export const MICAH_DASHBOARD_REMINDERS: MicahDashboardReminder[] = [
+  {
+    id: 'micah-1',
+    label: 'Call Sarah about the blocked drain',
+    hint: 'Urgent lead — she needs someone today',
+    href: '/app/leads',
+  },
+  {
+    id: 'micah-2',
+    label: 'Soft follow-up on James’s hot water quote',
+    hint: 'Sent 2 days ago · no reply yet',
+    href: '/app/quotes',
+  },
+  {
+    id: 'micah-3',
+    label: 'Chase Mark’s overdue invoice',
+    hint: 'LP-2026-014 · $4,200 · 7 days overdue',
+    href: '/app/invoices',
+  },
+  {
+    id: 'micah-4',
+    label: 'Confirm Lisa’s gas bayonet booking',
+    hint: 'On-site this arvo · Windsor',
+    href: '/app/bookings',
+  },
+]
+
 export const TODAYS_ATTENTION: AttentionItem[] = [
   {
     id: 'att-1',
@@ -316,4 +454,33 @@ export function formatDemoMoney(amount: number): string {
     currency: 'AUD',
     maximumFractionDigits: 0,
   }).format(amount)
+}
+
+const CALENDAR_KIND_LABELS: Record<CalendarEventKind, string> = {
+  job: 'On-site job',
+  booking: 'Booking request',
+  admin: 'Admin',
+  'site-visit': 'Site visit',
+}
+
+export function getCalendarKindLabel(kind: CalendarEventKind): string {
+  return CALENDAR_KIND_LABELS[kind]
+}
+
+export function formatCalendarTimeRange(startsAt: string, endsAt: string): string {
+  const start = new Date(startsAt)
+  const end = new Date(endsAt)
+  const day = start.toLocaleDateString('en-AU', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  })
+  const time = `${start.toLocaleTimeString('en-AU', {
+    hour: 'numeric',
+    minute: '2-digit',
+  })} – ${end.toLocaleTimeString('en-AU', {
+    hour: 'numeric',
+    minute: '2-digit',
+  })}`
+  return `${day} · ${time}`
 }

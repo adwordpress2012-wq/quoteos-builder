@@ -2,11 +2,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { calculateTotals } from '../lib/quoteos/calculations'
 import { generateEmailDraft } from '../lib/quoteos/email'
 import { parseMicahPrompt } from '../lib/quoteos/generateQuote'
-import {
-  applyPresetToLineItems,
-  getPresetByQuoteType,
-  getPackagePriceById,
-} from '../lib/quoteos/pricing'
+import { generateNextQuoteNumber } from '../lib/quoteos/numbering'
 import {
   buildMicahSetupNote,
   buildPaymentTerms,
@@ -17,21 +13,23 @@ import {
   wizardBusinessToSqbaId,
   type SqbaSetupConfig,
 } from '../lib/quoteos/setup-wizard'
-import {
-  getBusinessLabel,
-  getQuoteOption,
-  PACKAGE_TIERS,
-} from '../lib/quoteos/sqba-config'
+import { getBusinessLabel, getQuoteOption } from '../lib/quoteos/sqba-config'
 import {
   createLineItem,
   defaultQuoteState,
   type BusinessTypeId,
   type LineItem,
-  type PackageTierId,
   type QuoteFormState,
   type QuoteStatus,
-  type QuoteTypeId,
 } from '../lib/quoteos/types'
+
+const SUGGESTION_LINE_ITEMS = [
+  { label: 'Call-out fee', quantity: 1, amount: 200 },
+  { label: 'Labour', quantity: 1, amount: 90 },
+  { label: 'Materials', quantity: 1, amount: 0 },
+  { label: 'Emergency surcharge', quantity: 1, amount: 0 },
+  { label: 'Custom item', quantity: 1, amount: 0 },
+]
 
 export function useQuoteState(setupConfig?: SqbaSetupConfig | null) {
   const [quote, setQuote] = useState<QuoteFormState>(defaultQuoteState)
@@ -63,166 +61,76 @@ export function useQuoteState(setupConfig?: SqbaSetupConfig | null) {
     [],
   )
 
-  const applyQuoteType = useCallback((quoteTypeId: QuoteTypeId) => {
-    const preset = getPresetByQuoteType(quoteTypeId)
+  const ensureQuoteNumber = useCallback(() => {
+    let ensuredQuoteNumber = ''
     setQuote((prev) => {
-      const next: QuoteFormState = { ...prev, quoteTypeId }
-      if (preset) {
-        const price = getPackagePriceById(quoteTypeId)
-        next.quoteGenerated = true
-        next.lineItems = applyPresetToLineItems(preset)
-        next.inclusions = [...preset.inclusions]
-        if (price?.label) {
-          next.projectTitle = price.label
-        }
-        if (preset.suggestedSummary) {
-          next.projectSummary = preset.suggestedSummary
-        }
-        if (preset.suggestedPaymentTerms) {
-          next.paymentTerms = preset.suggestedPaymentTerms
-        }
+      const currentQuoteNumber = prev.quoteNumber.trim()
+      if (currentQuoteNumber) {
+        ensuredQuoteNumber = currentQuoteNumber
+        return prev
       }
-      return next
+
+      ensuredQuoteNumber = generateNextQuoteNumber()
+      return { ...prev, quoteNumber: ensuredQuoteNumber }
     })
-    setEmailDraftOverride(null)
+    return ensuredQuoteNumber
   }, [])
 
   const applySqbaSelection = useCallback(
     (businessTypeId: BusinessTypeId, quoteOptionId: string) => {
       const option = getQuoteOption(businessTypeId, quoteOptionId)
-      if (!option) return
-
-      setQuote((prev) => {
-        const next: QuoteFormState = {
-          ...prev,
-          businessTypeId,
-          sqbaQuoteOptionId: quoteOptionId,
-          businessType: getBusinessLabel(businessTypeId),
-          quoteTypeId: option.presetId,
-        }
-        if (option.summaryHint && !prev.projectSummary.trim()) {
-          next.projectSummary = option.summaryHint
-        }
-        const preset = getPresetByQuoteType(option.presetId)
-        if (preset) {
-          next.lineItems = applyPresetToLineItems(preset)
-          next.inclusions = [...preset.inclusions]
-          if (preset.suggestedSummary && !prev.projectSummary.trim()) {
-            next.projectSummary = preset.suggestedSummary
-          }
-          if (preset.suggestedPaymentTerms) {
-            next.paymentTerms = preset.suggestedPaymentTerms
-          }
-        }
-        return next
-      })
+      setQuote((prev) => ({
+        ...prev,
+        businessTypeId,
+        sqbaQuoteOptionId: quoteOptionId,
+        businessType: getBusinessLabel(businessTypeId),
+        quoteTypeId: option?.presetId ?? prev.quoteTypeId,
+        projectSummary:
+          prev.projectSummary.trim() || option?.summaryHint || prev.projectSummary,
+      }))
       setEmailDraftOverride(null)
     },
     [],
   )
 
-  const applyPreset = useCallback((presetId: QuoteTypeId) => {
-    applyQuoteType(presetId)
-  }, [applyQuoteType])
-
-  const appendPresetItems = useCallback((presetId: QuoteTypeId) => {
-    const preset = getPresetByQuoteType(presetId)
-    if (!preset) return
-
-    setQuote((prev) => {
-      const added = applyPresetToLineItems(preset)
-      const inclusions = [
-        ...new Set([...prev.inclusions, ...preset.inclusions]),
-      ]
-      return {
-        ...prev,
-        quoteTypeId: presetId,
-        quoteGenerated: true,
-        lineItems: [...prev.lineItems, ...added],
-        inclusions,
-        projectSummary:
-          prev.projectSummary.trim() ||
-          preset.suggestedSummary ||
-          prev.projectSummary,
-        paymentTerms: preset.suggestedPaymentTerms ?? prev.paymentTerms,
-      }
-    })
-    setEmailDraftOverride(null)
-  }, [])
-
   const generateSmartQuote = useCallback(() => {
     const parsed = parseMicahPrompt(quote.micahPrompt)
-    const option = getQuoteOption(parsed.businessTypeId, parsed.quoteOptionId)
 
     setQuote((prev) => {
+      const hasManualItems = prev.lineItems.some(
+        (item) => item.label.trim() && item.amount > 0,
+      )
       const next: QuoteFormState = {
         ...prev,
+        quoteNumber: prev.quoteNumber.trim() || generateNextQuoteNumber(),
         businessTypeId: parsed.businessTypeId,
         sqbaQuoteOptionId: parsed.quoteOptionId,
         businessType: getBusinessLabel(parsed.businessTypeId),
         projectTitle: prev.projectTitle.trim() || parsed.projectTitle,
-        projectSummary: parsed.projectSummary,
+        projectSummary: prev.projectSummary.trim() || parsed.projectSummary,
         quoteGenerated: true,
-        quoteTypeId: option?.presetId ?? 'custom',
       }
 
-      if (option) {
-        const preset = getPresetByQuoteType(option.presetId)
-        if (preset) {
-          next.lineItems = applyPresetToLineItems(preset)
-          next.inclusions = [...preset.inclusions]
-          if (preset.suggestedPaymentTerms) {
-            next.paymentTerms = preset.suggestedPaymentTerms
-          }
-        }
-      }
-
-      if (!next.clientBusinessName.trim() && parsed.projectSummary) {
-        const nameMatch = parsed.projectSummary.match(
-          /for\s+([A-Za-z][A-Za-z\s]+?)(?:\s|$|—)/i,
+      if (!hasManualItems) {
+        next.lineItems = SUGGESTION_LINE_ITEMS.map((item) =>
+          createLineItem(item),
         )
-        if (nameMatch?.[1]) {
-          next.clientBusinessName = nameMatch[1].trim()
-        }
       }
+
+      next.internalNotes = [
+        prev.internalNotes.trim(),
+        'Suggestion only: review item names, quantities and unit prices before sending.',
+      ]
+        .filter(Boolean)
+        .join('\n\n')
 
       return next
     })
+    setMicahDraft(
+      'Suggested structure added. Please edit quantities, unit prices, notes, deposit and payment instructions manually.',
+    )
     setEmailDraftOverride(null)
   }, [quote.micahPrompt])
-
-  const applyPackageTier = useCallback((tierId: PackageTierId) => {
-    const tier = PACKAGE_TIERS.find((t) => t.id === tierId)
-    if (!tier) return
-
-    setQuote((prev) => {
-      const oneOffItems = prev.lineItems.filter((i) => i.billingType === 'one-off')
-      const recurring = prev.lineItems.filter((i) => i.billingType !== 'one-off')
-
-      const packaged =
-        oneOffItems.length > 0
-          ? [
-              createLineItem({
-                label: `${tier.label} Package — ${getBusinessLabel(prev.businessTypeId)}`,
-                amount: Math.round(
-                  oneOffItems.reduce((s, i) => s + i.amount, 0) * tier.multiplier,
-                ),
-                billingType: 'one-off',
-              }),
-            ]
-          : prev.lineItems
-
-      return {
-        ...prev,
-        packageTier: tierId,
-        lineItems: [...packaged, ...recurring],
-        projectSummary:
-          prev.projectSummary.trim() ||
-          `Micah ${tier.label} package — scoped for clarity and margin protection.`,
-      }
-    })
-    setEmailDraftOverride(null)
-  }, [])
 
   const setQuoteStatus = useCallback((status: QuoteStatus) => {
     setQuote((prev) => ({ ...prev, quoteStatus: status }))
@@ -244,7 +152,7 @@ export function useQuoteState(setupConfig?: SqbaSetupConfig | null) {
   const addLineItem = useCallback(() => {
     setQuote((prev) => ({
       ...prev,
-      lineItems: [...prev.lineItems, createLineItem()],
+      lineItems: [...prev.lineItems, createLineItem({ label: 'Custom item' })],
     }))
     setEmailDraftOverride(null)
   }, [])
@@ -273,62 +181,27 @@ export function useQuoteState(setupConfig?: SqbaSetupConfig | null) {
   const applySetupWizard = useCallback((config: SqbaSetupConfig) => {
     const businessTypeId = wizardBusinessToSqbaId(config.businessType)
     const quoteOptionId = getPrimaryQuoteOptionId(config)
-    const option = getQuoteOption(businessTypeId, quoteOptionId)
     const depositPct = getDepositPercent(config)
     const suggestedLabels = getSuggestedLineItemLabels(config)
     const setupNote = buildMicahSetupNote(config)
 
-    setQuote((prev) => {
-      const next: QuoteFormState = {
-        ...prev,
-        businessTypeId,
-        sqbaQuoteOptionId: quoteOptionId,
-        businessType: getBusinessLabel(businessTypeId),
-        quoteTypeId: option?.presetId ?? 'custom',
-        paymentTerms: buildPaymentTerms(config),
-        quoteExpiryDate: buildQuoteExpiryDate(14),
-        depositEnabled: depositPct > 0,
-        internalNotes: prev.internalNotes.trim()
-          ? `${prev.internalNotes.trim()}\n\n${setupNote}`
-          : setupNote,
-        projectSummary:
-          option?.summaryHint ??
-          (prev.projectSummary.trim() ||
-            `${getBusinessLabel(businessTypeId)} quote — scoped as discussed.`),
-      }
-
-      const preset = option ? getPresetByQuoteType(option.presetId) : undefined
-      if (preset) {
-        next.inclusions = [...preset.inclusions]
-      }
-
-      if (suggestedLabels.length > 0) {
-        next.lineItems = suggestedLabels.map((label) =>
-          createLineItem({ label, amount: 0 }),
-        )
-      } else if (preset) {
-        next.lineItems = applyPresetToLineItems(preset)
-      }
-
-      if (config.pricingStyle === 'callout-total' && next.lineItems.length > 0) {
-        next.lineItems = [
-          createLineItem({ label: 'Callout fee', amount: 0 }),
-          ...next.lineItems.filter((i) => !/callout/i.test(i.label)),
-        ]
-      }
-
-      if (config.pricingStyle === 'hourly-labour') {
-        const hasHourly = next.lineItems.some((i) => /hour|labour/i.test(i.label))
-        if (!hasHourly) {
-          next.lineItems = [
-            ...next.lineItems,
-            createLineItem({ label: 'Labour (hourly)', amount: 0 }),
-          ]
-        }
-      }
-
-      return next
-    })
+    setQuote((prev) => ({
+      ...prev,
+      businessTypeId,
+      sqbaQuoteOptionId: quoteOptionId,
+      businessType: getBusinessLabel(businessTypeId),
+      quoteTypeId: 'custom',
+      paymentTerms: buildPaymentTerms(config),
+      quoteExpiryDate: buildQuoteExpiryDate(14),
+      depositEnabled: depositPct > 0,
+      internalNotes: prev.internalNotes.trim()
+        ? `${prev.internalNotes.trim()}\n\n${setupNote}`
+        : setupNote,
+      lineItems:
+        suggestedLabels.length > 0
+          ? suggestedLabels.map((label) => createLineItem({ label, amount: 0 }))
+          : prev.lineItems,
+    }))
     setEmailDraftOverride(null)
   }, [])
 
@@ -341,12 +214,9 @@ export function useQuoteState(setupConfig?: SqbaSetupConfig | null) {
     setMicahDraft,
     setEmailDraft,
     updateField,
-    applyQuoteType,
+    ensureQuoteNumber,
     applySqbaSelection,
-    applyPreset,
-    appendPresetItems,
     generateSmartQuote,
-    applyPackageTier,
     setQuoteStatus,
     updateLineItem,
     addLineItem,

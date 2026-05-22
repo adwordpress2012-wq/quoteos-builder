@@ -1,11 +1,7 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { CheckCircle2 } from 'lucide-react'
-import {
-  getDefaultQuoteOptionId,
-  type BusinessTypeId,
-} from '../lib/quoteos/sqba-config'
 import type { SqbaSetupConfig } from '../lib/quoteos/setup-wizard'
-import { getQuoteDisplayTitle } from '../lib/quoteos/calculations'
+import { generateEmailSubject } from '../lib/quoteos/email'
 import { AppShell } from '../components/app/AppShell'
 import { CommandCentreSidebar } from '../components/command/CommandCentreSidebar'
 import { BuilderOverlay } from '../components/app/BuilderOverlay'
@@ -13,7 +9,6 @@ import { CompactEmailCard } from '../components/app/CompactEmailCard'
 import { EmailDraftPanel } from '../components/app/EmailDraftPanel'
 import { GeneratedQuoteCard } from '../components/app/GeneratedQuoteCard'
 import { LiveProposalPanel } from '../components/app/LiveProposalPanel'
-import { ManualHybridSection } from '../components/app/ManualHybridSection'
 import { MobileBottomBar } from '../components/app/MobileBottomBar'
 import { MobileProposalSection } from '../components/app/MobileProposalSection'
 import { ProposalPreview } from '../components/app/ProposalPreview'
@@ -21,9 +16,6 @@ import { QuoteAdvancedEditor } from '../components/app/QuoteAdvancedEditor'
 import { QuotePromptCard } from '../components/app/QuotePromptCard'
 import { QuoteSetupWizard } from '../components/app/QuoteSetupWizard'
 import { SetupSummaryCard } from '../components/app/SetupSummaryCard'
-import { SimpleClientCard } from '../components/app/SimpleClientCard'
-import { FloatingMicah } from '../components/micah/FloatingMicah'
-import { MicahChatDrawer } from '../components/micah/MicahChatDrawer'
 import { useQuoteState } from '../hooks/useQuoteState'
 import { useSetupWizard } from '../hooks/useSetupWizard'
 
@@ -43,11 +35,9 @@ export function QuoteBuilderPage() {
     totals,
     emailDraft,
     updateField,
-    applySqbaSelection,
+    ensureQuoteNumber,
     generateSmartQuote,
-    applyPackageTier,
     applySetupWizard,
-    applyPreset,
     setQuoteStatus,
     updateLineItem,
     addLineItem,
@@ -56,26 +46,38 @@ export function QuoteBuilderPage() {
     resetQuote,
   } = useQuoteState(setup.completed ? setup : null)
 
-  const [micahDrawerOpen, setMicahDrawerOpen] = useState(false)
   const [proposalOpen, setProposalOpen] = useState(false)
   const [emailOpen, setEmailOpen] = useState(false)
   const [generating, setGenerating] = useState(false)
-  const [advancedOpen, setAdvancedOpen] = useState(false)
-  const advancedRef = useRef<HTMLDivElement>(null)
 
   const handleGenerate = useCallback(() => {
     setGenerating(true)
     generateSmartQuote()
     window.setTimeout(() => setGenerating(false), 400)
+    document.getElementById('quote-suggestion-prompt')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+    })
   }, [generateSmartQuote])
 
-  const handleBusinessTypeChange = (id: BusinessTypeId) => {
-    const optionId = getDefaultQuoteOptionId(id)
-    applySqbaSelection(id, optionId)
+  const handlePrint = () => {
+    const quoteNumber = ensureQuoteNumber()
+    const originalTitle = document.title
+    document.title = quoteNumber ? `QuoteOS-${quoteNumber}` : 'QuoteOS-quote'
+    const restoreTitle = () => {
+      document.title = originalTitle
+      window.removeEventListener('afterprint', restoreTitle)
+    }
+    window.addEventListener('afterprint', restoreTitle)
+    window.setTimeout(() => {
+      window.print()
+      window.setTimeout(restoreTitle, 1000)
+    }, 0)
   }
 
-  const handlePrint = () => {
-    window.print()
+  const handleSendQuote = () => {
+    ensureQuoteNumber()
+    setEmailOpen(true)
   }
 
   const handleWizardComplete = useCallback(
@@ -86,15 +88,16 @@ export function QuoteBuilderPage() {
     [completeSetup, applySetupWizard],
   )
 
-  const scrollToAdvanced = () => {
-    setAdvancedOpen(true)
-    window.setTimeout(() => {
-      advancedRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 50)
+  const scrollToManualForm = () => {
+    document.getElementById('quote-manual-form')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    })
   }
 
   const handleCopyEmail = async () => {
-    const subject = `Quote: ${getQuoteDisplayTitle(quote)}`
+    const quoteNumber = ensureQuoteNumber()
+    const subject = generateEmailSubject({ ...quote, quoteNumber })
     const text = `Subject: ${subject}\n\n${emailDraft}`
     try {
       await navigator.clipboard.writeText(text)
@@ -103,6 +106,11 @@ export function QuoteBuilderPage() {
       window.prompt('Copy email:', text)
     }
   }
+
+  const emailReady =
+    totals.subtotal > 0 ||
+    quote.clientBusinessName.trim().length > 0 ||
+    quote.projectSummary.trim().length > 0
 
   return (
     <AppShell>
@@ -121,7 +129,7 @@ export function QuoteBuilderPage() {
                   aria-hidden="true"
                 />
                 <p className="text-sm text-emerald-100">
-                  Your SQBA setup is ready. You can now generate quotes faster.
+                  Your SQBA setup is ready. Build quotes manually below.
                 </p>
               </div>
             )}
@@ -136,6 +144,27 @@ export function QuoteBuilderPage() {
                   />
                 ) : null}
 
+                <QuoteAdvancedEditor
+                  quote={quote}
+                  onFieldChange={updateField}
+                  onEnsureQuoteNumber={ensureQuoteNumber}
+                  onStatusChange={setQuoteStatus}
+                  onLineItemChange={updateLineItem}
+                  onAddLineItem={addLineItem}
+                  onRemoveLineItem={removeLineItem}
+                />
+
+                <GeneratedQuoteCard
+                  quote={quote}
+                  totals={totals}
+                  setup={setup.completed ? setup : null}
+                  onEditItems={scrollToManualForm}
+                  onExportPdf={handlePrint}
+                  onCopyEmail={handleCopyEmail}
+                  onSendQuote={handleSendQuote}
+                  onStatusChange={setQuoteStatus}
+                />
+
                 <QuotePromptCard
                   prompt={quote.micahPrompt}
                   onPromptChange={(v) => updateField('micahPrompt', v)}
@@ -143,59 +172,27 @@ export function QuoteBuilderPage() {
                   isGenerating={generating}
                 />
 
-                <ManualHybridSection onSelectPreset={applyPreset} />
-
-                <GeneratedQuoteCard
+                <MobileProposalSection
                   quote={quote}
                   totals={totals}
-                  setup={setup.completed ? setup : null}
-                  onEditItems={scrollToAdvanced}
-                  onCopyEmail={handleCopyEmail}
-                  onSendQuote={() => setEmailOpen(true)}
-                  onStatusChange={setQuoteStatus}
+                  onPrint={handlePrint}
                 />
 
-                {quote.quoteGenerated ? (
-                  <>
-                    <MobileProposalSection
-                      quote={quote}
-                      totals={totals}
-                      onPrint={handlePrint}
-                    />
-                    <SimpleClientCard quote={quote} onFieldChange={updateField} />
-                    <CompactEmailCard
-                      quote={quote}
-                      emailDraft={emailDraft}
-                      ready={quote.quoteGenerated}
-                      onOpenComposer={() => setEmailOpen(true)}
-                    />
-                    <div ref={advancedRef}>
-                      <QuoteAdvancedEditor
-                        key={advancedOpen ? 'advanced-open' : 'advanced-closed'}
-                        quote={quote}
-                        onFieldChange={updateField}
-                        onBusinessTypeChange={handleBusinessTypeChange}
-                        onQuoteOptionChange={(optionId) =>
-                          applySqbaSelection(quote.businessTypeId, optionId)
-                        }
-                        onPackageTier={applyPackageTier}
-                        onStatusChange={setQuoteStatus}
-                        onLineItemChange={updateLineItem}
-                        onAddLineItem={addLineItem}
-                        onRemoveLineItem={removeLineItem}
-                        defaultOpen={advancedOpen}
-                      />
-                    </div>
-                    {setup.completed ? (
-                      <button
-                        type="button"
-                        onClick={openWizard}
-                        className="min-h-[44px] w-full text-sm text-slate-500 underline-offset-2 hover:text-cyan-300 hover:underline"
-                      >
-                        Edit SQBA setup
-                      </button>
-                    ) : null}
-                  </>
+                <CompactEmailCard
+                  quote={quote}
+                  emailDraft={emailDraft}
+                  ready={emailReady}
+                  onOpenComposer={() => setEmailOpen(true)}
+                />
+
+                {setup.completed ? (
+                  <button
+                    type="button"
+                    onClick={openWizard}
+                    className="min-h-[44px] w-full text-sm text-slate-500 underline-offset-2 hover:text-cyan-300 hover:underline"
+                  >
+                    Edit SQBA setup
+                  </button>
                 ) : null}
               </div>
 
@@ -231,7 +228,7 @@ export function QuoteBuilderPage() {
             onClick={handlePrint}
             className="min-h-[44px] rounded-xl border border-blue-500/30 px-4 text-sm font-medium text-cyan-200"
           >
-            Print / Save PDF
+            Export PDF
           </button>
         </div>
       </BuilderOverlay>
@@ -245,6 +242,7 @@ export function QuoteBuilderPage() {
           emailDraft={emailDraft}
           quote={quote}
           onEmailDraftChange={setEmailDraft}
+          onExportPdf={handlePrint}
         />
       </BuilderOverlay>
 
@@ -260,26 +258,7 @@ export function QuoteBuilderPage() {
 
       <MobileBottomBar
         onGenerate={handleGenerate}
-        onReview={() =>
-          quote.quoteGenerated ? setProposalOpen(true) : handleGenerate()
-        }
-        onOpenMicah={() => setMicahDrawerOpen(true)}
-      />
-
-      <FloatingMicah
-        quote={quote}
-        setup={setup.completed ? setup : null}
-        isThinking={generating}
-        onClick={() => setMicahDrawerOpen(true)}
-      />
-
-      <MicahChatDrawer
-        open={micahDrawerOpen}
-        onClose={() => setMicahDrawerOpen(false)}
-        quote={quote}
-        emailDraft={emailDraft}
-        isThinking={generating}
-        onEmailDraftChange={setEmailDraft}
+        onReview={() => setProposalOpen(true)}
       />
     </AppShell>
   )

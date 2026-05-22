@@ -1,4 +1,4 @@
-import { Banknote, CreditCard, Smartphone } from 'lucide-react'
+import { Banknote, ClipboardList, Smartphone } from 'lucide-react'
 import { SectionHeading } from '../marketing/SectionHeading'
 
 const methods = [
@@ -13,8 +13,8 @@ const methods = [
     description: 'BSB and account on the PDF so customers can pay straight away.',
   },
   {
-    icon: CreditCard,
-    title: 'Direct deposit',
+    icon: ClipboardList,
+    title: 'Payment reference',
     description: 'Clear payment instructions — no chasing for how to pay.',
   },
 ]
@@ -26,7 +26,7 @@ export function PaymentInvoice() {
         <SectionHeading
           eyebrow="Getting paid"
           title="Invoices that work for tradies today"
-          description="For MVP, invoices can include PayID, bank transfer, or direct deposit details. Stripe and Square payment links can be added later when you're ready."
+          description="For MVP, invoices can include PayID, bank transfer, and direct deposit details for a manual-first tradie workflow."
         />
 
         <ul className="mt-10 grid gap-5 sm:grid-cols-3">

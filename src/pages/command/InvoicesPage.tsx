@@ -19,7 +19,7 @@ export function InvoicesPage() {
   return (
     <CommandCentreLayout
       title="Invoices"
-      subtitle="PayID, bank transfer, direct deposit — no Stripe yet"
+      subtitle="PayID, bank transfer, and direct deposit for manual payments"
     >
       <ul className="space-y-4">
         {invoices.map((inv) => (

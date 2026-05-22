@@ -1,32 +1,26 @@
-import { Eye, Sparkles, Wand2 } from 'lucide-react'
+import { Eye, Wand2 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 
 type MobileBottomBarProps = {
   onGenerate: () => void
   onReview: () => void
-  onOpenMicah: () => void
 }
 
-export function MobileBottomBar({
-  onGenerate,
-  onReview,
-  onOpenMicah,
-}: MobileBottomBarProps) {
+export function MobileBottomBar({ onGenerate, onReview }: MobileBottomBarProps) {
   return (
     <div
       className="fixed inset-x-0 bottom-0 z-40 border-t border-blue-500/25 bg-[var(--qos-bg)]/95 px-3 py-3 backdrop-blur-xl xl:hidden print:hidden"
       role="toolbar"
       aria-label="Builder actions"
     >
-      <div className="mx-auto grid max-w-lg grid-cols-3 gap-2">
+      <div className="mx-auto grid max-w-lg grid-cols-2 gap-2">
         <BarButton
           icon={Wand2}
-          label="Generate"
+          label="Suggest"
           onClick={onGenerate}
           primary
         />
         <BarButton icon={Eye} label="Preview" onClick={onReview} />
-        <BarButton icon={Sparkles} label="Micah" onClick={onOpenMicah} />
       </div>
     </div>
   )

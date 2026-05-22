@@ -1,7 +1,20 @@
 {
+  "redirects": [
+    {
+      "source": "/app",
+      "destination": "/app/dashboard",
+      "permanent": false
+    },
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "app.quoteos.com.au" }],
+      "destination": "/app/dashboard",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!assets/).*)",
       "destination": "/index.html"
     }
   ]

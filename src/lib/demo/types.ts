@@ -93,3 +93,54 @@ export type DashboardStats = {
   revenueMonth: number
   revenueYear: number
 }
+
+export type MorningBriefingStats = {
+  jobsToday: number
+  revenueWeek: number
+  outstandingInvoices: number
+  urgentLeads: number
+  upcomingBookings: number
+}
+
+export type DashboardKpiStats = {
+  weeklyRevenue: number
+  monthlyRevenue: number
+  outstandingPayments: number
+  jobsCompleted: number
+  averageJobValue: number
+}
+
+export type RecentActivityType =
+  | 'quote-sent'
+  | 'invoice-paid'
+  | 'booking-created'
+  | 'lead-added'
+
+export type RecentActivityItem = {
+  id: string
+  type: RecentActivityType
+  title: string
+  description: string
+  timeLabel: string
+  href: string
+}
+
+export type MicahDashboardReminder = {
+  id: string
+  label: string
+  hint: string
+  href: string
+}
+
+export type CalendarEventKind = 'job' | 'booking' | 'admin' | 'site-visit'
+
+export type DemoCalendarEvent = {
+  id: string
+  startsAt: string
+  endsAt: string
+  title: string
+  customer?: string
+  suburb?: string
+  kind: CalendarEventKind
+  notes?: string
+}

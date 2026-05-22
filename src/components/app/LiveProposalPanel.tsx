@@ -1,4 +1,4 @@
-import { Printer } from 'lucide-react'
+import { FileDown } from 'lucide-react'
 import type { QuoteFormState, QuoteTotals } from '../../lib/quoteos/types'
 import { ProposalPreview } from './ProposalPreview'
 import { cn } from '../../lib/utils'
@@ -36,8 +36,8 @@ export function LiveProposalPanel({
           onClick={onPrint}
           className="inline-flex min-h-[40px] items-center gap-2 rounded-xl border border-blue-500/30 bg-blue-500/10 px-3 text-xs font-semibold text-cyan-200 transition-colors hover:border-cyan-400/40"
         >
-          <Printer className="h-3.5 w-3.5" aria-hidden="true" />
-          Print / Save PDF
+          <FileDown className="h-3.5 w-3.5" aria-hidden="true" />
+          Export PDF
         </button>
       </div>
       <ProposalPreview quote={quote} totals={totals} hero />

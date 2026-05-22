@@ -1,6 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
-import { Copy, ExternalLink, Mail, Sparkles, ChevronDown } from 'lucide-react'
-import { getQuoteDisplayTitle } from '../../lib/quoteos/calculations'
+import {
+  ChevronDown,
+  Copy,
+  ExternalLink,
+  FileDown,
+  Mail,
+  Sparkles,
+} from 'lucide-react'
+import { generateEmailSubject } from '../../lib/quoteos/email'
 import { generateMicahSuggestion } from '../../lib/quoteos/micah'
 import type { MicahActionId, QuoteFormState } from '../../lib/quoteos/types'
 import { MICAH_ACTIONS } from '../../lib/quoteos/types'
@@ -19,6 +26,7 @@ type EmailDraftPanelProps = {
   emailDraft: string
   quote: QuoteFormState
   onEmailDraftChange: (text: string) => void
+  onExportPdf: () => void
 }
 
 async function copyText(text: string) {
@@ -34,14 +42,19 @@ export function EmailDraftPanel({
   emailDraft,
   quote,
   onEmailDraftChange,
+  onExportPdf,
 }: EmailDraftPanelProps) {
   const [subject, setSubject] = useState(
-    () => `Quote: ${getQuoteDisplayTitle(quote)}`,
+    () => generateEmailSubject(quote),
   )
   const [suggestionsOpen, setSuggestionsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   const mailto = `mailto:${encodeURIComponent(quote.email || '')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailDraft)}`
+
+  useEffect(() => {
+    setSubject(generateEmailSubject(quote))
+  }, [quote])
 
   const runAction = (action: MicahActionId) => {
     const result = generateMicahSuggestion(action, {
@@ -76,6 +89,14 @@ export function EmailDraftPanel({
         </span>
         <p className="text-sm text-slate-500">
           AgentMate-style composer · edits stay local
+        </p>
+      </div>
+
+      <div className="mt-4 rounded-xl border border-blue-500/25 bg-blue-500/10 p-3 text-sm text-slate-300">
+        <p className="font-semibold text-cyan-100">Manual Send Quote workflow</p>
+        <p className="mt-1">
+          Export the quote PDF first, then open your email app and attach the PDF
+          before sending. No payment links are added.
         </p>
       </div>
 
@@ -171,6 +192,14 @@ export function EmailDraftPanel({
       </div>
 
       <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+        <button
+          type="button"
+          onClick={onExportPdf}
+          className="inline-flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-xl border border-blue-500/30 bg-blue-500/10 px-4 text-sm font-semibold text-cyan-100"
+        >
+          <FileDown className="h-4 w-4" aria-hidden="true" />
+          Export PDF
+        </button>
         <button
           type="button"
           onClick={() => copyText(`Subject: ${subject}\n\n${emailDraft}`)}

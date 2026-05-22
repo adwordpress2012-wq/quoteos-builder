@@ -121,12 +121,6 @@ export const JOB_TYPES_BY_BUSINESS: Record<WizardBusinessTypeId, WizardJobOption
       quoteOptionId: 'plumber-emergency',
       lineItemLabels: ['Emergency callout fee', 'Repair labour'],
     },
-    {
-      id: 'website-scw',
-      label: 'Website + SCW package',
-      quoteOptionId: 'plumber-website-scw',
-      lineItemLabels: ['Website + SCW package'],
-    },
   ],
   electrician: [
     {
@@ -210,33 +204,30 @@ export const JOB_TYPES_BY_BUSINESS: Record<WizardBusinessTypeId, WizardJobOption
   ],
   agency: [
     {
-      id: 'website',
-      label: 'Website build',
-      quoteOptionId: 'agency-website',
-      lineItemLabels: ['Website build package'],
+      id: 'build',
+      label: 'Building / renovation',
+      quoteOptionId: 'agency-build',
+      lineItemLabels: ['Building labour', 'Materials'],
     },
     {
-      id: 'growth',
-      label: 'Growth package',
+      id: 'custom',
+      label: 'Custom job',
       quoteOptionId: 'agency-custom',
-      lineItemLabels: ['Growth package setup'],
+      lineItemLabels: ['Service / labour', 'Materials'],
     },
   ],
   'dos-client': [
     {
-      id: 'rebuild',
-      label: 'Website rebuild',
-      quoteOptionId: 'dos-rebuild',
+      id: 'general',
+      label: 'General trade job',
+      quoteOptionId: 'dos-general',
+      lineItemLabels: ['Service / labour', 'Materials'],
     },
     {
-      id: 'scw',
-      label: 'Smart Chat Widget',
-      quoteOptionId: 'dos-scw',
-    },
-    {
-      id: 'micah-sba',
-      label: 'Micah SBA',
-      quoteOptionId: 'dos-micah-sba',
+      id: 'custom',
+      label: 'Custom quote',
+      quoteOptionId: 'dos-custom',
+      lineItemLabels: ['Line item'],
     },
   ],
   other: [

@@ -45,7 +45,7 @@ export function MobileProposalSection({
             onClick={onPrint}
             className="min-h-[48px] w-full rounded-xl border border-blue-500/30 text-sm font-semibold text-cyan-200"
           >
-            Print / Save PDF
+            Export PDF
           </button>
         </div>
       ) : null}

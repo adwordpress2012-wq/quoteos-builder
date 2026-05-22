@@ -16,6 +16,8 @@ const COMMAND_PATHS = [
   '/app/follow-ups',
   '/app/customers',
   '/app/micah',
+  '/app/calendar',
+  '/app/tools',
   '/app/settings',
   '/app/builder',
 ]

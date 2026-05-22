@@ -9,6 +9,8 @@ import { InvoicesPage } from './pages/command/InvoicesPage'
 import { FollowUpsPage } from './pages/command/FollowUpsPage'
 import { CustomersPage } from './pages/command/CustomersPage'
 import { MicahPage } from './pages/command/MicahPage'
+import { DosCalendarPage } from './pages/command/DosCalendarPage'
+import { ToolsPage } from './pages/command/ToolsPage'
 import { SettingsPage } from './pages/command/SettingsPage'
 
 function App() {
@@ -25,6 +27,8 @@ function App() {
       <Route path="/app/follow-ups" element={<FollowUpsPage />} />
       <Route path="/app/customers" element={<CustomersPage />} />
       <Route path="/app/micah" element={<MicahPage />} />
+      <Route path="/app/calendar" element={<DosCalendarPage />} />
+      <Route path="/app/tools" element={<ToolsPage />} />
       <Route path="/app/settings" element={<SettingsPage />} />
     </Routes>
   )

@@ -2,6 +2,12 @@ import { formatAud, getQuoteDisplayTitle } from './calculations'
 import type { WritingToneId } from './setup-wizard'
 import type { QuoteFormState, QuoteTotals } from './types'
 
+export function generateEmailSubject(state: QuoteFormState): string {
+  const quoteNumber = state.quoteNumber.trim()
+  const title = getQuoteDisplayTitle(state)
+  return quoteNumber ? `Quote ${quoteNumber}: ${title}` : `Quote: ${title}`
+}
+
 export function generateEmailDraft(
   state: QuoteFormState,
   totals: QuoteTotals,
@@ -12,19 +18,20 @@ export function generateEmailDraft(
   const project = getQuoteDisplayTitle(state)
   const summary =
     state.projectSummary.trim() ||
-    'Please review the attached quote for full scope and pricing.'
+    'Please review the quote for full scope and pricing.'
 
   const lines: string[] = [
     `Hi ${name},`,
     '',
     `Thanks for the opportunity to work with ${business}.`,
     '',
-    `Please find your quote attached as a PDF for **${project}**.`,
+    `Please find your quote for ${project}.`,
+    state.quoteNumber.trim() ? `Quote number: ${state.quoteNumber.trim()}` : '',
     '',
     summary,
     '',
-    '**Quote summary**',
-    `- Today / setup: ${formatAud(totals.oneOffTotal)}`,
+    'Quote summary',
+    `- Total: ${formatAud(totals.subtotal)}`,
   ]
 
   if (totals.monthlyRecurringTotal > 0) {
@@ -48,6 +55,10 @@ export function generateEmailDraft(
     lines.push('', `This quote is valid until ${state.quoteExpiryDate}.`)
   }
 
+  if (state.paymentInstructions.trim()) {
+    lines.push('', state.paymentInstructions.trim())
+  }
+
   const nextStep =
     writingTone === 'simple'
       ? 'Reply to accept or ask a question.'
@@ -55,23 +66,19 @@ export function generateEmailDraft(
         ? 'Reply if you are happy to go ahead, or shout if you have any questions.'
         : writingTone === 'premium'
           ? 'Please reply to confirm approval or request any clarifications at your convenience.'
-          : 'Reply to this email to accept the quote or ask any questions — we’re happy to adjust scope if needed.'
+          : 'Reply to this email to accept the quote or ask any questions. We are happy to adjust scope if needed.'
 
   const signOff =
     writingTone === 'casual-au'
       ? ['Cheers,']
       : writingTone === 'premium'
         ? ['Kind regards,', 'Your service team']
-        : ['Kind regards,', 'The DOS Team']
+        : ['Kind regards,', 'The QuoteOS Team']
 
-  lines.push('', '**Next step**', nextStep, '', ...signOff)
+  lines.push('', 'Next step', nextStep, '', ...signOff)
 
   if (writingTone !== 'casual-au' && writingTone !== 'simple') {
-    lines.push(
-      'QuoteOS — Smart Quote Builder',
-      'Powered by Directive Operating Systems (DOS)',
-      'https://directiveos.com.au',
-    )
+    lines.push('QuoteOS')
   }
 
   if (writingTone === 'simple') {
@@ -90,7 +97,7 @@ export function generateQuoteSummary(
 ): string {
   const project = getQuoteDisplayTitle(state)
   const parts = [
-    `${project} — ${state.clientBusinessName || 'Client'}`,
+    `${state.quoteNumber || 'Quote'} - ${project} - ${state.clientBusinessName || 'Client'}`,
     `Today / setup: ${formatAud(totals.oneOffTotal)}`,
   ]
   if (totals.monthlyRecurringTotal > 0) {
@@ -104,5 +111,5 @@ export function generateQuoteSummary(
       `Deposit: ${formatAud(totals.depositAmount)} | Balance: ${formatAud(totals.remainingBalance)}`,
     )
   }
-  return parts.join(' · ')
+  return parts.join(' | ')
 }

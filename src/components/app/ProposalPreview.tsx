@@ -1,32 +1,21 @@
 import { formatAud, getQuoteDisplayTitle } from '../../lib/quoteos/calculations'
-import { getPackagePriceById } from '../../lib/quoteos/pricing'
 import type { QuoteFormState, QuoteTotals } from '../../lib/quoteos/types'
-import { QUOTE_TYPE_OPTIONS } from '../../lib/quoteos/types'
 import { cn } from '../../lib/utils'
 
 type ProposalPreviewProps = {
   quote: QuoteFormState
   totals: QuoteTotals
   id?: string
-  /** Slightly tighter styling when embedded in the live preview column */
   hero?: boolean
 }
 
 export function ProposalPreview({ quote, totals, id, hero }: ProposalPreviewProps) {
   const title = getQuoteDisplayTitle(quote)
-  const quoteTypeLabel =
-    QUOTE_TYPE_OPTIONS.find((o) => o.id === quote.quoteTypeId)?.label ?? 'Quote'
-  const packagePreset = getPackagePriceById(quote.quoteTypeId)
-  const packageLabel = packagePreset?.label ?? quoteTypeLabel
-
-  const oneOffItems = quote.lineItems.filter((i) => i.billingType === 'one-off')
-  const monthlyItems = quote.lineItems.filter((i) => i.billingType === 'monthly')
-  const yearlyItems = quote.lineItems.filter((i) => i.billingType === 'yearly')
-
-  const setupTotal = Number.isFinite(totals.oneOffTotal) ? totals.oneOffTotal : 0
-  const recurringMonthly = Number.isFinite(totals.monthlyRecurringTotal)
-    ? totals.monthlyRecurringTotal
-    : 0
+  const hasPayId = quote.paymentPayId.trim()
+  const hasBankDetails =
+    quote.paymentAccountName.trim() ||
+    quote.paymentBsb.trim() ||
+    quote.paymentAccountNumber.trim()
 
   return (
     <article
@@ -45,16 +34,15 @@ export function ProposalPreview({ quote, totals, id, hero }: ProposalPreviewProp
               </span>
               <div>
                 <p className="text-xl font-semibold text-slate-50">QuoteOS</p>
-                <p className="text-xs text-cyan-400/90">Smart Quote Builder</p>
+                <p className="text-xs text-cyan-400/90">
+                  Business logo placeholder
+                </p>
               </div>
             </div>
-            <p className="mt-3 text-xs text-slate-500">
-              Powered by DOS — Directive Operating Systems
-            </p>
           </div>
           <div className="text-right text-sm">
-            <p className="font-semibold text-cyan-300">Proposal</p>
-            <p className="text-slate-400">{quoteTypeLabel}</p>
+            <p className="font-semibold text-cyan-300">Quote number</p>
+            <p className="text-slate-400">{quote.quoteNumber || '-'}</p>
             {quote.quoteExpiryDate ? (
               <p className="mt-1 text-xs text-slate-500">
                 Valid until {quote.quoteExpiryDate}
@@ -67,174 +55,165 @@ export function ProposalPreview({ quote, totals, id, hero }: ProposalPreviewProp
         </h1>
       </header>
 
-      {quote.quoteGenerated || quote.lineItems.length > 0 ? (
-        <section className="mt-5 rounded-xl border border-purple-500/20 bg-purple-500/8 px-4 py-3">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-purple-300">
-            Selected package
-          </p>
-          <p className="mt-1 text-lg font-semibold text-slate-50">{packageLabel}</p>
-          <p className="mt-1 text-sm text-cyan-200/90">
-            {setupTotal > 0 ? formatAud(setupTotal) : '—'} setup
-            {recurringMonthly > 0
-              ? ` · ${formatAud(recurringMonthly)}/month`
-              : ''}
-          </p>
-        </section>
-      ) : null}
-
       <section className="mt-6 grid gap-6 sm:grid-cols-2">
         <div>
           <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-            Prepared for
+            Customer
           </h2>
           <p className="mt-2 font-medium text-slate-100">
-            {quote.clientBusinessName || '—'}
+            {quote.clientBusinessName || '-'}
           </p>
-          {quote.contactName ? (
-            <p className="text-sm text-slate-400">{quote.contactName}</p>
-          ) : null}
-          {quote.email ? (
-            <p className="text-sm text-slate-400">{quote.email}</p>
-          ) : null}
-          {quote.phone ? (
-            <p className="text-sm text-slate-400">{quote.phone}</p>
-          ) : null}
+          {quote.contactName ? <p className="text-sm text-slate-400">{quote.contactName}</p> : null}
+          {quote.email ? <p className="text-sm text-slate-400">{quote.email}</p> : null}
+          {quote.phone ? <p className="text-sm text-slate-400">{quote.phone}</p> : null}
         </div>
         <div>
           <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-            Project
+            Job address
           </h2>
           <p className="mt-2 text-sm font-medium text-slate-200">
-            {title}
+            {quote.jobAddress || '-'}
           </p>
         </div>
-      </section>
-
-      <section className="mt-8">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-          Line items
-        </h2>
-        <LineItemTable items={oneOffItems} suffix="" />
-        {monthlyItems.length > 0 ? (
-          <LineItemTable items={monthlyItems} suffix="/mo" title="Monthly" />
-        ) : null}
-        {yearlyItems.length > 0 ? (
-          <LineItemTable items={yearlyItems} suffix="/yr" title="Yearly" />
-        ) : null}
       </section>
 
       {quote.projectSummary.trim() ? (
         <section className="mt-6">
           <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-            Implementation notes
+            Job description
           </h2>
-          <p className="mt-2 text-sm leading-relaxed text-slate-300">
+          <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-slate-300">
             {quote.projectSummary}
           </p>
         </section>
       ) : null}
 
+      <section className="mt-8">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+          Line items
+        </h2>
+        <LineItemTable items={quote.lineItems} />
+      </section>
+
       <section className="mt-8 rounded-xl border border-cyan-500/20 bg-cyan-500/[0.06] p-4">
         <dl className="space-y-2 text-sm">
-          <TotalRow label="Total" value={formatAud(totals.subtotal)} />
-          <TotalRow
-            label="Setup total"
-            value={
-              setupTotal > 0
-                ? formatAud(setupTotal)
-                : 'Pricing missing — please set price'
-            }
-            highlight
-          />
-          {recurringMonthly > 0 ? (
-            <TotalRow
-              label="Recurring total"
-              value={`${formatAud(recurringMonthly)}/mo`}
-            />
-          ) : null}
-          {totals.yearlyRecurringTotal > 0 ? (
-            <TotalRow
-              label="Ongoing"
-              value={`${formatAud(totals.yearlyRecurringTotal)}/yr`}
-            />
-          ) : null}
+          <TotalRow label="Total" value={formatAud(totals.subtotal)} highlight />
           {quote.depositEnabled && totals.depositAmount > 0 ? (
             <>
-              <TotalRow
-                label="Deposit (50%)"
-                value={formatAud(totals.depositAmount)}
-              />
-              <TotalRow
-                label="Balance"
-                value={formatAud(totals.remainingBalance)}
-              />
+              <TotalRow label="Deposit (50%)" value={formatAud(totals.depositAmount)} />
+              <TotalRow label="Balance" value={formatAud(totals.remainingBalance)} />
             </>
           ) : null}
         </dl>
       </section>
 
-      {quote.inclusions.length > 0 ? (
+      {quote.internalNotes.trim() ? (
         <section className="mt-6">
           <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-            Inclusions
+            Notes
           </h2>
-          <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-slate-300">
-            {quote.inclusions.map((inc) => (
-              <li key={inc}>{inc}</li>
-            ))}
-          </ul>
+          <p className="mt-2 whitespace-pre-line text-sm text-slate-300">
+            {quote.internalNotes}
+          </p>
         </section>
       ) : null}
 
       <section className="mt-6">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-          Payment terms
+          Payment instructions
         </h2>
-        <p className="mt-2 text-sm text-slate-300">
-          {quote.paymentTerms || 'As agreed.'}
-        </p>
+        <div className="mt-2 space-y-3 text-sm text-slate-300">
+          {hasPayId ? (
+            <dl className="rounded-xl border border-blue-500/15 bg-blue-500/5 p-3">
+              <PaymentDetail label="PayID" value={quote.paymentPayId} />
+            </dl>
+          ) : (
+            <dl className="rounded-xl border border-blue-500/15 bg-blue-500/5 p-3">
+              <PaymentDetail label="PayID" value="Not supplied" />
+            </dl>
+          )}
+          {hasBankDetails ? (
+            <dl className="grid gap-2 rounded-xl border border-blue-500/15 bg-blue-500/5 p-3">
+              {quote.paymentAccountName.trim() ? (
+                <PaymentDetail
+                  label="Account name"
+                  value={quote.paymentAccountName}
+                />
+              ) : null}
+              {quote.paymentBsb.trim() ? (
+                <PaymentDetail label="BSB" value={quote.paymentBsb} />
+              ) : null}
+              {quote.paymentAccountNumber.trim() ? (
+                <PaymentDetail
+                  label="Account number"
+                  value={quote.paymentAccountNumber}
+                />
+              ) : null}
+            </dl>
+          ) : (
+            <dl className="grid gap-2 rounded-xl border border-blue-500/15 bg-blue-500/5 p-3">
+              <PaymentDetail label="Bank details" value="Not supplied" />
+            </dl>
+          )}
+          <p className="whitespace-pre-line">
+            {quote.paymentInstructions || quote.paymentTerms || 'As agreed.'}
+          </p>
+        </div>
       </section>
 
       <footer className="mt-8 border-t border-blue-500/15 pt-6">
         <p className="text-sm font-medium text-cyan-300">
-          Ready to proceed? Reply to accept this quote or contact us with any
-          questions.
+          Reply to accept this quote or contact us with any questions.
         </p>
         <p className="mt-2 text-xs text-slate-500">
-          Generated with QuoteOS SQB · quoteos.com.au
+          Generated with QuoteOS Trade Quote Builder
         </p>
       </footer>
     </article>
   )
 }
 
-function LineItemTable({
-  items,
-  suffix,
-  title,
-}: {
-  items: QuoteFormState['lineItems']
-  suffix: string
-  title?: string
-}) {
-  if (items.length === 0) return null
+function PaymentDetail({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex flex-wrap justify-between gap-2">
+      <dt className="font-medium text-slate-400">{label}</dt>
+      <dd className="font-semibold text-slate-100">{value}</dd>
+    </div>
+  )
+}
+
+function LineItemTable({ items }: { items: QuoteFormState['lineItems'] }) {
+  if (items.length === 0) {
+    return (
+      <p className="mt-3 rounded-xl border border-blue-500/15 bg-blue-500/5 p-3 text-sm text-slate-400">
+        No line items added yet.
+      </p>
+    )
+  }
   return (
     <table className="mt-3 w-full text-sm">
-      {title ? (
-        <caption className="mb-1 text-left text-xs font-medium text-slate-500">
-          {title}
-        </caption>
-      ) : null}
+      <thead>
+        <tr className="border-b border-blue-500/20 text-xs uppercase tracking-wider text-slate-500">
+          <th className="py-2 pr-3 text-left font-semibold">Item</th>
+          <th className="py-2 px-3 text-right font-semibold">Qty</th>
+          <th className="py-2 px-3 text-right font-semibold">Unit price</th>
+          <th className="py-2 pl-3 text-right font-semibold">Total</th>
+        </tr>
+      </thead>
       <tbody>
-        {items.map((item) => (
-          <tr key={item.id} className="border-b border-blue-500/10">
-            <td className="py-2 pr-4 text-slate-300">{item.label || '—'}</td>
-            <td className="py-2 text-right font-medium text-slate-100">
-              {formatAud(item.amount)}
-              {suffix}
-            </td>
-          </tr>
-        ))}
+        {items.map((item) => {
+          const lineTotal = (item.quantity || 0) * (item.amount || 0)
+          return (
+            <tr key={item.id} className="border-b border-blue-500/10">
+              <td className="py-2 pr-3 text-slate-300">{item.label || '-'}</td>
+              <td className="py-2 px-3 text-right text-slate-300">{item.quantity || 0}</td>
+              <td className="py-2 px-3 text-right text-slate-300">{formatAud(item.amount)}</td>
+              <td className="py-2 pl-3 text-right font-medium text-slate-100">
+                {formatAud(lineTotal)}
+              </td>
+            </tr>
+          )
+        })}
       </tbody>
     </table>
   )

@@ -101,7 +101,7 @@ const QUOTEOS_PRICING_ANSWER =
   'Starter is $297 setup, $97/month, plus $390/year hosting and support. Growth is $997 setup, $297/month, plus $490/year hosting and support. Scale is custom for larger teams or higher enquiry volume.'
 
 const QUOTEOS_WORKFLOW_ANSWER =
-  'QuoteOS works simply: a customer visits the tradie website, chats with Micah SCW, Micah collects the job details, prepares SQBA-ready lead data, and the tradie gets notified. The tradie reviews everything, prepares and sends the quote, notes any booking request through Calendly or Google Calendar, and can send a PDF quote or invoice. PayID or bank transfer comes first; Stripe or Square can be added later.'
+  'QuoteOS works simply: a customer visits the tradie website, chats with Micah SCW, Micah collects the job details, prepares SQBA-ready lead data, and the tradie gets notified. The tradie reviews everything, prepares and sends the quote, notes any booking request through Calendly or Google Calendar, and can send a PDF quote or invoice. PayID, bank transfer, and direct deposit come first.'
 
 const SQBA_ANSWER =
   'SQBA is the QuoteOS dashboard logic for lead review, quote preparation, email drafts, follow-up reminders, PDF quote/invoice prep, and payment wording. It keeps everything review-only so the tradie approves before anything goes out.'
@@ -230,7 +230,7 @@ export function answerMicahQuestion(
     }
 
     if (/stripe|square|card|payment|payid|bank transfer/.test(lower)) {
-      return 'QuoteOS is PayID and bank transfer first for the MVP. Stripe or Square can come later, after the tradie has reviewed the workflow.'
+      return 'QuoteOS is PayID, bank transfer, and direct deposit first for the MVP. Customers should use the quote number as the payment reference.'
     }
 
     if (/fergus|tradify|simpro|aroflo|servicem8|competitor|compare/.test(lower)) {
@@ -245,9 +245,6 @@ export function answerMicahQuestion(
   }
 
   if (/how much|price|cost|charge|one-page|one page|google|email/.test(lower)) {
-    if (quote.quoteTypeId === 'dos-website-growth') {
-      return 'This quote is $1,990 setup plus $49/month ongoing support.'
-    }
     return `This quote is ${price}. It includes ${inclusions}. Packaged as a ${packageLabel} so it is easier for ${customer} to approve.`
   }
 

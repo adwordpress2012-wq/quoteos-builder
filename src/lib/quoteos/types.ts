@@ -1,3 +1,5 @@
+import { generateNextQuoteNumber } from './numbering'
+
 export type BillingType = 'one-off' | 'monthly' | 'yearly'
 
 export type BusinessTypeId =
@@ -18,25 +20,13 @@ export type QuoteStatus =
 
 export type PackageTierId = 'starter' | 'growth' | 'premium'
 
+/** Tradie quote category — manual line items carry the real pricing. */
 export type QuoteTypeId =
-  | 'dos-website-starter'
-  | 'dos-website-growth'
-  | 'dos-website-premium'
-  | 'dos-website-custom'
-  | 'dos-website-rebuild'
-  | 'new-website-build'
-  | 'micah-sba'
-  | 'smart-chat-widget'
-  | 'agentmate-setup'
-  | 'google-business-setup'
-  | 'email-setup'
-  | 'hosting-support'
-  | 'dos-ai-automation'
-  | 'plumber-job'
-  | 'electrician-job'
-  | 'painter-job'
-  | 'fencing-job'
-  | 'landscaping-job'
+  | 'plumbing'
+  | 'electrical'
+  | 'building'
+  | 'painting'
+  | 'general_trade'
   | 'custom'
 
 export type QuoteTypeOption = {
@@ -45,30 +35,18 @@ export type QuoteTypeOption = {
 }
 
 export const QUOTE_TYPE_OPTIONS: QuoteTypeOption[] = [
-  { id: 'dos-website-starter', label: 'Website Starter Package' },
-  { id: 'dos-website-growth', label: 'Website Growth Package' },
-  { id: 'dos-website-premium', label: 'Website Premium Package' },
-  { id: 'dos-website-custom', label: 'Custom Website Package' },
-  { id: 'dos-website-rebuild', label: 'DOS Website Rebuild' },
-  { id: 'new-website-build', label: 'New Website Build' },
-  { id: 'micah-sba', label: 'Micah SBA' },
-  { id: 'smart-chat-widget', label: 'Smart Chat Widget' },
-  { id: 'agentmate-setup', label: 'AgentMate Setup' },
-  { id: 'google-business-setup', label: 'Google Business Setup' },
-  { id: 'email-setup', label: 'Email Setup' },
-  { id: 'hosting-support', label: 'Hosting & Support' },
-  { id: 'dos-ai-automation', label: 'DOS AI Automation Package' },
-  { id: 'plumber-job', label: 'Plumber Job Quote' },
-  { id: 'electrician-job', label: 'Electrician Job Quote' },
-  { id: 'painter-job', label: 'Painter Job Quote' },
-  { id: 'fencing-job', label: 'Fencing Job Quote' },
-  { id: 'landscaping-job', label: 'Landscaping Job Quote' },
-  { id: 'custom', label: 'Custom Quote' },
+  { id: 'plumbing', label: 'Plumbing' },
+  { id: 'electrical', label: 'Electrical' },
+  { id: 'building', label: 'Building' },
+  { id: 'painting', label: 'Painting' },
+  { id: 'general_trade', label: 'General trade' },
+  { id: 'custom', label: 'Custom' },
 ]
 
 export type LineItem = {
   id: string
   label: string
+  quantity?: number
   amount: number
   billingType: BillingType
 }
@@ -78,6 +56,12 @@ export type QuoteFormState = {
   contactName: string
   email: string
   phone: string
+  jobAddress: string
+  quoteNumber: string
+  paymentPayId: string
+  paymentAccountName: string
+  paymentBsb: string
+  paymentAccountNumber: string
   businessType: string
   businessTypeId: BusinessTypeId
   sqbaQuoteOptionId: string
@@ -85,6 +69,7 @@ export type QuoteFormState = {
   quoteTypeId: QuoteTypeId
   projectSummary: string
   internalNotes: string
+  paymentInstructions: string
   quoteExpiryDate: string
   paymentTerms: string
   lineItems: LineItem[]
@@ -132,8 +117,9 @@ export function createLineItem(
   return {
     id: crypto.randomUUID(),
     label: partial?.label ?? '',
+    quantity: partial?.quantity ?? 1,
     amount: partial?.amount ?? 0,
-    billingType: partial?.billingType ?? 'one-off',
+    billingType: 'one-off',
   }
 }
 
@@ -143,13 +129,20 @@ export function defaultQuoteState(): QuoteFormState {
     contactName: '',
     email: '',
     phone: '',
+    jobAddress: '',
+    quoteNumber: generateNextQuoteNumber(),
+    paymentPayId: '',
+    paymentAccountName: '',
+    paymentBsb: '',
+    paymentAccountNumber: '',
     businessType: '',
     businessTypeId: 'plumber',
     sqbaQuoteOptionId: 'plumber-custom',
     projectTitle: '',
-    quoteTypeId: 'custom',
+    quoteTypeId: 'plumbing',
     projectSummary: '',
     internalNotes: '',
+    paymentInstructions: 'Please use the quote number as the payment reference.',
     quoteExpiryDate: '',
     paymentTerms: '50% deposit to commence. Balance due on completion.',
     lineItems: [createLineItem({ label: 'Service', amount: 0 })],
