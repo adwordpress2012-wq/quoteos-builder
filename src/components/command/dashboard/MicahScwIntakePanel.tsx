@@ -17,6 +17,8 @@ const SCW_LEAD = {
 }
 
 const CHAT_MESSAGES = [
+  // TODO: Replace this local transcript with the real Micah SCW API response
+  // when COS intake integration is ready. Keep demo mode local until then.
   {
     id: 'm1',
     role: 'assistant',
@@ -89,7 +91,7 @@ export function MicahScwIntakePanel() {
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-cyan-400/90">
-              Twin Micah
+              Ask Micah ✨
             </p>
             <h2
               id="micah-scw-intake-heading"
@@ -113,6 +115,15 @@ export function MicahScwIntakePanel() {
         </PageActions>
         {status ? <p className="mt-3 text-sm text-teal-200">{status}</p> : null}
       </section>
+
+      <button
+        type="button"
+        className="fixed bottom-5 left-4 z-50 inline-flex min-h-12 items-center justify-center rounded-full border border-cyan-300/40 bg-gradient-to-r from-blue-600 to-cyan-500 px-5 text-sm font-bold text-white shadow-[0_0_28px_rgba(34,211,238,0.34)] transition-transform hover:-translate-y-0.5 hover:shadow-[0_0_36px_rgba(34,211,238,0.48)] focus:outline-none focus:ring-2 focus:ring-cyan-200 focus:ring-offset-2 focus:ring-offset-slate-950 lg:left-[236px]"
+        onClick={() => setDrawerOpen(true)}
+        aria-label="Ask Micah"
+      >
+        Ask Micah ✨
+      </button>
 
       <div
         className={cn(
@@ -145,6 +156,9 @@ export function MicahScwIntakePanel() {
               <p className="text-sm text-slate-500">
                 Demo/mock chat data only. No Resend, Twilio, Stripe, or Square.
               </p>
+              <p className="mt-1 text-xs font-medium text-cyan-200/80">
+                Demo intake mode — live Micah SCW connection coming soon.
+              </p>
             </div>
             <button
               type="button"
@@ -164,7 +178,9 @@ export function MicahScwIntakePanel() {
                     <MessageCircle className="h-5 w-5 text-cyan-100" aria-hidden="true" />
                   </span>
                   <div>
-                    <p className="text-sm font-semibold text-slate-50">Micah UI</p>
+                    <p className="text-sm font-semibold text-slate-50">
+                      Micah SCW Intake
+                    </p>
                     <p className="text-xs text-slate-500">Customer enquiry capture</p>
                   </div>
                 </div>
@@ -214,7 +230,7 @@ export function MicahScwIntakePanel() {
 
             <section className="rounded-2xl border border-purple-400/25 bg-purple-500/10 p-4">
               <p className="text-sm font-semibold uppercase tracking-wider text-purple-200">
-                Micah UX
+                Micah SCW Intake
               </p>
               <h3 className="mt-2 text-xl font-semibold text-slate-50">
                 Operational intake summary
