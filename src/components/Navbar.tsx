@@ -9,13 +9,13 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-[#e2e8f0] bg-white/95 shadow-sm backdrop-blur-md">
-      <div className="mx-auto flex min-h-[4.5rem] max-w-6xl items-center justify-between gap-3 px-4 py-2 sm:min-h-[5rem] sm:gap-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex min-h-[5.25rem] max-w-6xl items-center justify-between gap-3 py-2.5 pl-6 pr-4 sm:min-h-[6rem] sm:gap-4 sm:py-3 sm:pl-8 sm:pr-6 md:min-h-[6.5rem] lg:min-h-28 lg:pl-10 lg:pr-8">
         <a
           href="#top"
-          className="flex shrink-0 items-center py-1 pr-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#2563eb]"
+          className="flex shrink-0 items-center py-0.5 pr-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#2563eb]"
           onClick={() => setOpen(false)}
         >
-          <QuoteOsLogo size="lg" />
+          <QuoteOsLogo size="nav" />
         </a>
 
         <nav

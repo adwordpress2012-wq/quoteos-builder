@@ -7,13 +7,15 @@ type QuoteOsLogoProps = {
   compact?: boolean
   className?: string
   /** Navbar / footer sizing preset */
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg' | 'nav'
 }
 
 const sizeClasses = {
   sm: 'h-9 w-auto sm:h-10',
   md: 'h-10 w-auto sm:h-11 md:h-12',
   lg: 'h-11 w-auto sm:h-12 md:h-14 lg:h-[3.75rem]',
+  /** Marketing navbar — mobile 52px → desktop 96px */
+  nav: 'h-[3.25rem] w-auto sm:h-14 md:h-[4.75rem] lg:h-20 xl:h-24 max-w-none',
 } as const
 
 const iconSizeClasses = {
@@ -37,7 +39,7 @@ export function QuoteOsLogo({
         decoding="async"
         className={cn(
           'shrink-0 object-contain object-center',
-          iconSizeClasses[size],
+          iconSizeClasses[size === 'nav' ? 'lg' : size],
           className,
         )}
       />
@@ -48,12 +50,14 @@ export function QuoteOsLogo({
     <img
       src="/qos-logo-full.png"
       alt="QOS Hub — Quote, Book, Grow"
-      width={280}
-      height={72}
+      width={560}
+      height={373}
       decoding="async"
       className={cn(
-        'max-w-[min(100%,17.5rem)] shrink-0 object-contain object-left',
-        sizeClasses[size],
+        'shrink-0 object-contain object-left',
+        size === 'nav'
+          ? sizeClasses.nav
+          : cn('max-w-[min(100%,17.5rem)]', sizeClasses[size]),
         className,
       )}
     />
