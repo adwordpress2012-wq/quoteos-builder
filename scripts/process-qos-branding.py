@@ -104,8 +104,20 @@ def main() -> None:
     full = trim_transparent(remove_black_bg(Image.open(FULL_SRC)))
     icon = trim_transparent(remove_black_bg(Image.open(ICON_SRC)))
 
-    full.save(PUBLIC / "qos-logo-full.png", optimize=True)
-    icon.save(PUBLIC / "qos-logo-icon.png", optimize=True)
+    web_full = full.copy()
+    max_w = 560
+    if web_full.width > max_w:
+        ratio = max_w / web_full.width
+        web_full = web_full.resize(
+            (max_w, int(web_full.height * ratio)),
+            Image.Resampling.LANCZOS,
+        )
+    web_full.save(PUBLIC / "qos-logo-full.png", optimize=True)
+    web_icon = icon.copy()
+    max_icon = 256
+    if max(web_icon.width, web_icon.height) > max_icon:
+        web_icon.thumbnail((max_icon, max_icon), Image.Resampling.LANCZOS)
+    web_icon.save(PUBLIC / "qos-logo-icon.png", optimize=True)
 
     square_icon(icon, 32).save(PUBLIC / "favicon-32x32.png", optimize=True)
     square_icon(icon, 180).save(PUBLIC / "apple-touch-icon.png", optimize=True)
