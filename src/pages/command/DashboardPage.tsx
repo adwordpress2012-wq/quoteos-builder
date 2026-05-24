@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Briefcase,
@@ -26,12 +26,17 @@ import {
   TODAYS_ATTENTION,
 } from '../../lib/demo/demo-data'
 import { cn } from '../../lib/utils'
+import { PipOperationalPanel } from '../../components/pip'
+import { buildQuoteOsPipContext } from '../../lib/pip/buildQuoteOsPipContext'
+import { quoteOsPipQuickActions } from '../../lib/pip/pipQuickActions'
 
 export function DashboardPage() {
-  const { addExpense, createInvoice, dashboardKpis } = useDemoStore()
+  const { addExpense, createInvoice, dashboardKpis, leads } = useDemoStore()
   const kpis = dashboardKpis
   const [expenseOpen, setExpenseOpen] = useState(false)
   const [invoiceOpen, setInvoiceOpen] = useState(false)
+  const pipContext = useMemo(() => buildQuoteOsPipContext({ leads }), [leads])
+  const pipQuickActions = useMemo(() => quoteOsPipQuickActions(), [])
 
   return (
     <CommandCentreLayout
@@ -39,6 +44,12 @@ export function DashboardPage() {
       subtitle={`${DEMO_BUSINESS.name} — your main operating screen`}
     >
       <div className="space-y-6">
+        <PipOperationalPanel
+          context={pipContext}
+          quickActions={pipQuickActions}
+          variant="doshub"
+          settingsHref="/app/settings"
+        />
         <MorningBriefing />
         <QuickActionsRow
           onAddExpense={() => setExpenseOpen(true)}
